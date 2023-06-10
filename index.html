@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ChaosVision</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>ChaosVision</h1>
+      <div id="artContainer"></div>
+      <input type="text" id="expressionInput" placeholder="Enter a number or a numeric expression" />
+
+      <div id="shapeOptions">
+        <div class="option">
+          <label for="shapeOpacityInput">Opacity:</label>
+          <input type="range" id="shapeOpacityInput" min="0" max="1" step="0.1" value="1" />
+        </div>
+        <div class="option">
+          <label for="shapeSizeInput">Size:</label>
+          <input type="range" id="shapeSizeInput" min="10" max="200" value="50" />
+        </div>
+        <div class="option">
+          <label for="shapeBoxShadowInput">Box Shadow:</label>
+          <input type="range" id="shapeBoxShadowInput" min="0" max="10" value="0" />
+        </div>
+        <div class="option">
+          <label for="animationSelect">Animation:</label>
+          <select id="animationSelect">
+            <option value="none">None</option>
+            <option value="pulse">Pulse Animation</option>
+            <option value="flash">Flash Animation</option>
+            <option value="blink">Blink Animation</option>
+            <option value="glowing">Glowing Animation</option>
+            <option value="sparkle">Sparkle Animation</option>
+            <option value="flip">Flip Animation</option>
+            <option value="swing">Swing Animation</option>
+            <option value="wiggle">Wiggle Animation</option>
+            <option value="jello">Jello Animation</option>
+            <option value="fadeIn">Fade In Animation</option>
+            <option value="fadeOut">Fade Out Animation</option>
+            <option value="rotateIn">Rotate In Animation</option>
+            <option value="rotateOut">Rotate Out Animation</option>
+            <option value="bounceIn">Bounce In Animation</option>
+            <option value="bounceOut">Bounce Out Animation</option>
+            <option value="zoomIn">Zoom In Animation</option>
+            <option value="zoomOut">Zoom Out Animation</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="generateBtn">Unleash the Chaos!</button>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
