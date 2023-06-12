@@ -10,6 +10,8 @@
       <div id="artContainer"></div>
       <input type="text" id="expressionInput" placeholder="Enter a number or a numeric expression" />
 
+      <div class="warning-message">Inputting over 1000 can severely impact performance and responsiveness, especially with animations</div>
+
       <div id="shapeOptions">
         <div class="option">
           <label for="shapeOpacityInput">Opacity:</label>
@@ -17,7 +19,7 @@
         </div>
         <div class="option">
           <label for="shapeSizeInput">Size:</label>
-          <input type="range" id="shapeSizeInput" min="10" max="200" value="50" />
+          <input type="range" id="shapeSizeInput" min="10" max="100" value="50" />
         </div>
         <div class="option">
           <label for="shapeBoxShadowInput">Box Shadow:</label>
@@ -27,23 +29,23 @@
           <label for="animationSelect">Animation:</label>
           <select id="animationSelect">
             <option value="none">None</option>
-            <option value="pulse">Pulse Animation</option>
-            <option value="flash">Flash Animation</option>
-            <option value="blink">Blink Animation</option>
-            <option value="glowing">Glowing Animation</option>
-            <option value="sparkle">Sparkle Animation</option>
-            <option value="flip">Flip Animation</option>
-            <option value="swing">Swing Animation</option>
-            <option value="wiggle">Wiggle Animation</option>
-            <option value="jello">Jello Animation</option>
-            <option value="fadeIn">Fade In Animation</option>
-            <option value="fadeOut">Fade Out Animation</option>
-            <option value="rotateIn">Rotate In Animation</option>
-            <option value="rotateOut">Rotate Out Animation</option>
-            <option value="bounceIn">Bounce In Animation</option>
-            <option value="bounceOut">Bounce Out Animation</option>
-            <option value="zoomIn">Zoom In Animation</option>
-            <option value="zoomOut">Zoom Out Animation</option>
+            <option value="pulse">Pulse</option>
+            <option value="flash">Flash</option>
+            <option value="blink">Blink</option>
+            <option value="glowing">Glowing</option>
+            <option value="sparkle">Sparkle</option>
+            <option value="flip">Flip</option>
+            <option value="swing">Swing</option>
+            <option value="wiggle">Wiggle</option>
+            <option value="jello">Jello</option>
+            <option value="fadeIn">Fade In</option>
+            <option value="fadeOut">Fade Out</option>
+            <option value="rotateIn">Rotate Clockwise</option>
+            <option value="rotateOut">Rotate Anticlockwise</option>
+            <option value="bounceIn">Bounce In</option>
+            <option value="bounceOut">Bounce Out</option>
+            <option value="zoomIn">Zoom In</option>
+            <option value="zoomOut">Zoom Out</option>
           </select>
         </div>
       </div>
