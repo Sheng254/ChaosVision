@@ -1,4 +1,4 @@
-# ChaosVision
+# ChaosVision 🌀👁️‍🗨️
 
 ![ChaosVision](ChaosVision.png)
 
@@ -6,7 +6,7 @@ ChaosVision is a web application that harnesses mathematics to discover the beau
 
 ## Features
 - **Numerically Driven Art Generation:** Create art by entering numbers or numeric expressions.
-- **Customizable Shape Properties:** Personalise with options to adjust opacity, size, and box shadow.
+- **Customisable Shape Properties:** Personalise with options to adjust opacity, size, and box shadow.
 - **Dynamic Effects:** Choose from a variety of animations to add captivating visual effects.
 - **Error Handling:** Validate numbers or the results of numeric expressions to ensure they are less than 10,000 and prevent non-numeric inputs.
 
