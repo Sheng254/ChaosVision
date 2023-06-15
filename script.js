@@ -117,5 +117,19 @@ function getRandomRotation() {
   return `rotate(${rotationDegrees[Math.floor(Math.random() * rotationDegrees.length)]})`;
 }
 
+// Save math art as an image
+function saveImage() {
+  const artContainer = document.getElementById('artContainer'); // Get the art container
+  html2canvas(artContainer).then(function (canvas) {
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'math_art.png';
+    link.click();
+  });
+}
+
 const generateBtn = document.getElementById('generateBtn');
 generateBtn.addEventListener('click', generateMathArt);
+
+const saveBtn = document.getElementById('saveBtn');
+saveBtn.addEventListener('click', saveImage);
