@@ -123,7 +123,7 @@ function saveImage() {
   html2canvas(artContainer).then(function (canvas) {
     const link = document.createElement('a');
     link.href = canvas.toDataURL('image/png');
-    link.download = 'math_art.png';
+    link.download = 'ChaosVision.png';
     link.click();
   });
 }
