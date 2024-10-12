@@ -9,44 +9,89 @@ body {
 .container {
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 10px 0;
   text-align: center;
 }
 
 h1 {
   color: #fff;
-  font-size: 55px;
+  font-size: 50px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  margin-top: 5px; 
+  margin-bottom: 5px; 
+  padding-bottom: 0;
 }
 
-#saveBtn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background-color: #ff00ff;
-  color: #fff;
-  padding: 8px 16px;
-  font-size: 18px;
-  border: none;
+.title-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+/* Info icon styling */
+.info-icon {
+  display: inline-block;
   cursor: pointer;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 6px rgba(255, 0, 255, 0.5);
+  font-size: 14px;
+  margin-left: 8px;
+  position: relative;
 }
 
-#saveBtn:hover {
-  background-color: #ff0080;
-  transform: scale(1.1);
+.info-icon i {
+  color: #ffffff;
 }
 
+/* Tooltip text styling */
+.tooltip-text {
+  background-color: #000;
+  color: #fff;
+  font-family: Arial, sans-serif; 
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  border: 2px solid #fff; 
+  position: absolute;
+  z-index: 1;
+  top: 125%; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  opacity: 0; 
+  transition: opacity 0.3s ease-in-out;
+  font-size: 14px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  pointer-events: none; 
+}
+
+/* Tooltip arrow */
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  bottom: 100%; 
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent #000 transparent; 
+}
+
+/* Show tooltip on hover */
+.info-icon:hover .tooltip-text {
+  opacity: 1; 
+  pointer-events: auto; 
+}
 
 /* Art Container Styles */
 #artContainer {
   width: 400px;
   height: 400px;
   background-color: #111;
-  margin: 20px auto;
+  margin: 0px auto;
+  margin-bottom: 20px;
   border: 2px solid #ff00ff;
   position: relative;
   display: flex;
@@ -176,10 +221,17 @@ h1 {
 
 
 /* Input & Button Styles */
-#expressionInput {
+.input-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  width: 100%;             
   margin-top: 10px;
+}
+
+#expressionInput {
   padding: 10px;
-  width: 60%;
+  width: 55%;             
   box-sizing: border-box;
   font-size: 16px;
   border: 2px solid #ff00ff;
@@ -190,31 +242,49 @@ h1 {
   box-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
 }
 
-#generateBtn {
-  margin-top: 10px;
+/* Save Button */
+#saveBtn {
   background-color: #ff00ff;
   color: #fff;
-  padding: 12px 24px;
-  font-size: 20px;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  font-size: 16px;
   border: none;
   cursor: pointer;
-  border-radius: 50px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
+  border-radius: 8px;     
+  margin-right: 10px; 
   box-shadow: 0 4px 10px rgba(255, 0, 255, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-#generateBtn:hover {
+/* Generate Button */
+#generateBtn {
+  background-color: #ff00ff;
+  color: #fff;
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-left: 10px;           
+  box-shadow: 0 4px 10px rgba(255, 0, 255, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#saveBtn i, #generateBtn i {
+  font-size: 18px;
+}
+
+#saveBtn:hover, #generateBtn:hover {
   background-color: #ff0080;
   transform: scale(1.05);
-}
-
-.warning-message {
-  color: #ff0000;
-  font-size: 18px;
-  margin-top: 10px;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Options Styles */
