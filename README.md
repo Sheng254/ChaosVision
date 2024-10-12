@@ -2,25 +2,19 @@
 
 ![ChaosVision](ChaosVision.png)
 
-ChaosVision is a web application that harnesses mathematics to discover the beauty hidden within chaos. It generates mesmerising visual patterns by utilising a combination of shapes, opacity, sizes, box shadow, and animation effects. With its intuitive interface, users can explore the creative realm by incorporating numbers and numeric expressions, resulting in intricate and harmonious compositions. 
+Inspired by Chaos Theory, ChaosVision is a web application that uses mathematics to discover the beauty within chaos. It generates chaotic visual patterns through a blend of shapes, opacity, sizes, box shadows, and animations.
+
+This application reflects Chaos Theory principles, where small changes in input lead to different outcomes.
 
 ## Features
-- **Numerically Driven Art Generation:** Create art by entering numbers or numeric expressions.
+- **Numerically Driven Art Generation:** Create art by entering numbers or numeric expressions, with input sanitisation to allow only valid mathematical characters.
 - **Customisable Shape Properties:** Personalise with options to adjust opacity, size, and box shadow.
 - **Dynamic Effects:** Choose from a variety of animations to add captivating visual effects.
-- **Error Handling:** Validate numbers or the results of numeric expressions to ensure they are less than 10,000 and prevent non-numeric inputs.
+- **Error Handling:** Validate numbers or the results of numeric expressions to ensure they are less than 100,000 and prevent non-numeric inputs.
 - **Download Images:** Save the generated art as PNG image files.
 
 ## Accessing ChaosVision
 To access ChaosVision, simply visit the following website: https://sheng254.github.io/ChaosVision/
-
-## Potential Enhancements for the Future
-- Expand the available math functions to include advanced operations like trigonometry, logarithms, and exponentiation, allowing for even more complex and creative expressions.
-- Introduce more shape types, such as polygons, curves, or even custom shapes, to offer a broader range of design possibilities.
-- Improve the performance of the generation process to enhance smooth rendering and responsiveness, particularly when handling large input values.
-
-## Contributing
-Contributions are welcome! Feel free to reach out with your suggestions, bug reports, or feature requests.
 
 ## License
 This project is licensed under the [MIT License](LICENSE).
