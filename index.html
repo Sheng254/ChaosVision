@@ -1,65 +1,381 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" prefix="og: https://ogp.me/ns#">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <title>ChaosVision</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="ChaosVision" />
+    <meta name="description" content="An interactive computational laboratory and generative art studio for non-linear dynamical systems, 3D strange attractors, double pendulum swarms, and fractal bifurcations." />
+    <meta name="keywords" content="Chaos Theory, Strange Attractor, Lorenz Attractor, Aizawa Attractor, Double Pendulum, Lyapunov Exponent, Feigenbaum Bifurcation, Generative Art, Web Audio API, Canvas 3D, Sheng254, Nonlinear Dynamics, Mathematical Physics" />
+    <meta name="author" content="Sheng254" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#05050a" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="canonical" href="https://sheng254.github.io/ChaosVision/" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌀</text></svg>" />
+
+    <!-- Open Graph / Facebook / LinkedIn / Discord Previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://sheng254.github.io/ChaosVision/" />
+    <meta property="og:title" content="ChaosVision" />
+    <meta property="og:description" content="Explore deterministic chaos, 3D strange attractors, double pendulum swarms, and generative ambient soundscapes in real-time." />
+    <meta property="og:site_name" content="ChaosVision" />
+    <meta property="og:image" content="https://sheng254.github.io/ChaosVision/preview.png" />
+
+    <!-- Twitter / X Card Previews -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://sheng254.github.io/ChaosVision/" />
+    <meta name="twitter:title" content="ChaosVision" />
+    <meta name="twitter:description" content="Explore deterministic chaos, 3D strange attractors, double pendulum swarms, and generative ambient soundscapes in real-time." />
+    <meta name="twitter:image" content="https://sheng254.github.io/ChaosVision/preview.png" />
+    <meta name="twitter:creator" content="@Sheng254" />
+
+    <!-- Schema.org JSON-LD Structured Data for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ChaosVision",
+      "url": "https://sheng254.github.io/ChaosVision/",
+      "description": "An interactive computational laboratory and generative art studio for non-linear dynamical systems, 3D strange attractors, double pendulum swarms, and fractal bifurcations.",
+      "applicationCategory": "EducationalApplication, MultimediaApplication",
+      "operatingSystem": "All",
+      "author": {
+        "@type": "Person",
+        "name": "Sheng254",
+        "url": "https://github.com/Sheng254"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "keywords": "Chaos Theory, Strange Attractors, Lorenz, Double Pendulum, Bifurcation, Web Audio API, Generative Art"
+    }
+    </script>
+
+    <!-- Vector Icons and Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="container">
-	  <h1 class="title-wrapper">
-		  ChaosVision
-		  <span class="info-icon">
-          <i class="fas fa-info-circle"></i>
-          <span class="tooltip-text">Inspired by Chaos Theory, ChaosVision uses randomness and dynamic mathematical inputs to generate chaotic visual patterns.</span>
-        </span>
-      </h1>
-      <div id="artContainer"></div>
-      <div class="input-wrapper">
-        <button id="saveBtn"><i class="fas fa-save"></i></button>
-        <input type="text" id="expressionInput" placeholder="Enter a number or a numeric expression" />
-        <button id="generateBtn"><i class="fas fa-infinity"></i></button> 
+    <!-- Fullscreen Interactive Canvas -->
+    <canvas id="main-canvas"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="brand-section">
+        <span class="brand-logo">🌀</span>
+        <span class="brand-title">ChaosVision</span>
       </div>
-      <div id="shapeOptions">
-        <div class="option">
-          <label for="shapeOpacityInput">Opacity:</label>
-          <input type="range" id="shapeOpacityInput" min="0" max="1" step="0.1" value="1" />
-        </div>
-        <div class="option">
-          <label for="shapeSizeInput">Size:</label>
-          <input type="range" id="shapeSizeInput" min="10" max="100" value="50" />
-        </div>
-        <div class="option">
-          <label for="shapeBoxShadowInput">Box Shadow:</label>
-          <input type="range" id="shapeBoxShadowInput" min="0" max="10" value="0" />
-        </div>
-        <div class="option">
-          <label for="animationSelect">Animation:</label>
-          <select id="animationSelect">
-            <option value="none">None</option>
-            <option value="pulse">Pulse</option>
-            <option value="flash">Flash</option>
-            <option value="blink">Blink</option>
-            <option value="glowing">Glowing</option>
-            <option value="sparkle">Sparkle</option>
-            <option value="flip">Flip</option>
-            <option value="swing">Swing</option>
-            <option value="wiggle">Wiggle</option>
-            <option value="jello">Jello</option>
-            <option value="fadeIn">Fade In</option>
-            <option value="fadeOut">Fade Out</option>
-            <option value="rotateIn">Rotate Clockwise</option>
-            <option value="rotateOut">Rotate Anticlockwise</option>
-            <option value="bounceIn">Bounce In</option>
-            <option value="bounceOut">Bounce Out</option>
-            <option value="zoomIn">Zoom In</option>
-            <option value="zoomOut">Zoom Out</option>
+
+      <div class="nav-actions">
+        <button id="btn-tutorial" class="btn-glass" data-tooltip="Interactive studio guide explaining controls and shortcuts">
+          <i class="fas fa-book-open"></i>
+          <span class="btn-label">Tutorial</span>
+        </button>
+
+        <button id="btn-museum-tour" class="btn-glass btn-primary" data-tooltip="Launch the interactive live guided tour across all 13 chaos exhibits">
+          <i class="fas fa-landmark"></i>
+          <span class="btn-label">Museum Tour</span>
+        </button>
+
+        <button id="btn-sound-toggle" class="btn-glass" data-tooltip="Toggle relaxing ambient generative soundscape">
+          <i class="fas fa-wave-square"></i>
+          <span class="btn-label">Audio: OFF</span>
+        </button>
+
+        <button id="btn-reset-camera" class="btn-glass" data-tooltip="Recenter camera angle, position, and zoom">
+          <i class="fas fa-arrows-rotate"></i>
+          <span class="btn-label">Recenter</span>
+        </button>
+
+        <button id="btn-share" class="btn-glass" data-tooltip="Copy link with your exact parameters, colors, and camera angle">
+          <i class="fas fa-link"></i>
+          <span class="btn-label">Share</span>
+        </button>
+
+        <button id="btn-export-svg" class="btn-glass" data-tooltip="Export vector SVG curves for pen plotters and laser cutters">
+          <i class="fas fa-bezier-curve"></i>
+          <span class="btn-label">Vector SVG</span>
+        </button>
+
+        <button id="btn-export-4k" class="btn-glass" data-tooltip="Render and download high-resolution 4K Ultra-HD wallpaper">
+          <i class="fas fa-gem"></i>
+          <span class="btn-label">4K Wallpaper</span>
+        </button>
+
+        <button id="btn-record-video" class="btn-glass" data-tooltip="Record 60FPS video for as long as you wish">
+          <i class="fas fa-video"></i>
+          <span class="btn-label">Record Video</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Floating Glass HUD Control Deck -->
+    <aside id="hud-container" class="hud-panel">
+      <button id="btn-toggle-hud" class="btn-toggle-hud" data-tooltip="Collapse or expand control drawer">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+
+      <div class="hud-header">
+        <span class="hud-title">Dynamical Controls</span>
+      </div>
+
+      <div class="hud-content">
+        <!-- System Selector -->
+        <div class="control-group">
+          <label class="control-label" for="system-select">Chaotic System</label>
+          <select id="system-select" class="glass-select" data-tooltip="Select a continuous strange attractor, discrete map, or physical system">
+            <optgroup label="3D Continuous Strange Attractors">
+              <option value="3d_attractor:lorenz" selected>Lorenz Attractor (Butterfly Effect)</option>
+              <option value="3d_attractor:aizawa">Aizawa Attractor (Spherical Inversion)</option>
+              <option value="3d_attractor:thomas">Thomas Labyrinth (Symmetric Loop)</option>
+              <option value="3d_attractor:rossler">Rössler Attractor (Möbius Fold)</option>
+              <option value="3d_attractor:chen">Chen System (Dual Vortex)</option>
+              <option value="3d_attractor:halvorsen">Halvorsen Attractor (Tri-Symmetric)</option>
+            </optgroup>
+            <optgroup label="2D Discrete Strange Maps">
+              <option value="2d_map:clifford">Clifford Attractor (Smoke Ribbons)</option>
+              <option value="2d_map:dejong">Peter de Jong (Harmonic Silk)</option>
+              <option value="2d_map:tinkerbell">Tinkerbell Map (Quadratic Chaos)</option>
+              <option value="2d_map:ikeda">Ikeda Map (Laser Cavity Resonator)</option>
+              <option value="2d_map:gumowski">Gumowski-Mira (CERN Accelerator)</option>
+            </optgroup>
+            <optgroup label="Physical and Mathematical Dynamics">
+              <option value="pendulum:double_pendulum">Double Pendulum (Lyapunov Swarm)</option>
+              <option value="bifurcation:logistic">Feigenbaum Bifurcation Cascade</option>
+            </optgroup>
+            <optgroup label="Custom Sandbox">
+              <option value="custom:sandbox">Custom Formula Sandbox</option>
+            </optgroup>
           </select>
+        </div>
+
+        <!-- Custom Formula Sandbox -->
+        <div id="custom-formula-section">
+          <label class="control-label" for="custom-formula-input">Update Equation: x_{n+1} = f(x, y)</label>
+          <input type="text" id="custom-formula-input" class="formula-input" value="sin(a * y) - cos(b * x)" placeholder="e.g. sin(a*y) - cos(b*x)" />
+          <button id="btn-compile-formula" class="btn-glass btn-primary" style="width:100%;">Compile and Run</button>
+          <div id="formula-error"></div>
+        </div>
+
+        <!-- Palette Selector -->
+        <div class="control-group">
+          <label class="control-label" for="palette-select">Color Palette</label>
+          <select id="palette-select" class="glass-select" data-tooltip="Choose curated bioluminescent, cyberpunk, or celestial color ramps"></select>
+        </div>
+
+        <!-- Butterfly Divergence Swarm Count -->
+        <div class="control-group">
+          <div style="display:flex; justify-content:space-between;">
+            <label class="control-label">Swarm Trajectories</label>
+            <span id="swarm-count-val" class="param-num-val">3</span>
+          </div>
+          <input type="range" id="swarm-count-input" min="1" max="15" step="1" value="3" data-tooltip="Number of parallel trajectories starting with microscopic initial differences" />
+        </div>
+
+        <!-- Speed -->
+        <div class="control-group">
+          <div style="display:flex; justify-content:space-between;">
+            <label class="control-label">Simulation Speed</label>
+            <span id="speed-val" class="param-num-val">1.0x</span>
+          </div>
+          <input type="range" id="speed-input" min="0.1" max="3.0" step="0.1" value="1.0" data-tooltip="Simulation integration time step velocity" />
+        </div>
+
+        <!-- Trail Decay -->
+        <div class="control-group">
+          <div style="display:flex; justify-content:space-between;">
+            <label class="control-label">Motion Trail Persistence</label>
+            <span id="decay-val" class="param-num-val">0.06</span>
+          </div>
+          <input type="range" id="decay-input" min="0.01" max="0.30" step="0.01" value="0.06" data-tooltip="Adjust visual exposure persistence and motion blur" />
+        </div>
+
+        <!-- Dynamic Equation Parameters Header -->
+        <div style="margin-top: 6px;">
+          <span class="control-label" style="text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">System Parameters</span>
+        </div>
+
+        <!-- Dynamic Parameter Sliders Container -->
+        <div id="dynamic-params"></div>
+      </div>
+    </aside>
+
+    <!-- LIVE DRAGGABLE MUSEUM TOUR DECK (Editorial Science Curation) -->
+    <div id="museum-tour-deck" class="museum-tour-deck">
+      <div id="tour-deck-header" class="deck-header" title="Click and drag to reposition anywhere on screen">
+        <div class="deck-title-group">
+          <span id="tour-category-badge" class="badge">3D CONTINUOUS ATTRACTOR</span>
+          <h3 id="tour-title">The Butterfly Effect (Lorenz 1963)</h3>
+          <span id="tour-subtitle" class="deck-subtitle">How a 3-Decimal Rounding Error Destroyed Determinism</span>
+          <span id="tour-author" class="deck-author">Edward Lorenz (MIT, 1963)</span>
+        </div>
+        <div class="deck-window-controls">
+          <button id="tour-deck-minimize" class="deck-btn-icon" data-tooltip="Minimize / restore exhibit story deck"><i class="fas fa-window-minimize"></i></button>
+          <button id="tour-deck-close" class="deck-btn-icon" data-tooltip="Close museum tour"><i class="fas fa-times"></i></button>
+        </div>
+      </div>
+
+      <div class="deck-body">
+        <!-- The Narrative -->
+        <div class="deck-section">
+          <div class="deck-section-title"><i class="fas fa-lightbulb"></i> The Big Discovery</div>
+          <p id="tour-narrative" class="deck-text"></p>
+        </div>
+
+        <!-- Look Closer (Visual Cues) -->
+        <div class="deck-section visual-cue-section">
+          <div class="deck-section-title"><i class="fas fa-eye"></i> Look Closer: What To Watch On Screen</div>
+          <p id="tour-visual-cue" class="deck-text"></p>
+        </div>
+
+        <!-- Interactive Experiment -->
+        <div class="deck-section experiment-section">
+          <div class="deck-section-title"><i class="fas fa-flask"></i> Interactive Experiment: Try This Now</div>
+          <p id="tour-experiment" class="deck-text highlight-experiment"></p>
+        </div>
+
+        <!-- Mathematical Architecture -->
+        <div class="deck-section">
+          <div class="deck-section-title"><i class="fas fa-square-root-variable"></i> Mathematical Architecture</div>
+          <div id="tour-formula" class="deck-formula-box"></div>
+          <p id="tour-physics" class="deck-subtext"></p>
+        </div>
+
+        <!-- Real-World Impact -->
+        <div class="deck-section">
+          <div class="deck-section-title"><i class="fas fa-earth-americas"></i> Why It Matters Today</div>
+          <p id="tour-impact" class="deck-text"></p>
+        </div>
+      </div>
+
+      <div class="deck-footer">
+        <button id="tour-prev-btn" class="btn-glass" data-tooltip="Go to previous exhibit"><i class="fas fa-chevron-left"></i> Previous</button>
+        <div class="tour-nav-center">
+          <select id="tour-exhibit-select" class="glass-select" style="max-width: 250px;" data-tooltip="Jump to any exhibit"></select>
+          <span id="tour-index-indicator" class="tour-index">1 / 13</span>
+        </div>
+        <button id="tour-next-btn" class="btn-glass btn-primary" data-tooltip="Go to next exhibit">Next <i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- Floating Bottom Bar: Metrics & Creator Credit -->
+    <div class="bottom-bar">
+      <div class="metrics-hud">
+        <div class="metric-item">
+          <i class="fas fa-tachometer-alt"></i>
+          <span id="stats-fps" class="metric-val">60 FPS</span>
+        </div>
+        <div class="metric-item">
+          <i class="fas fa-layer-group"></i>
+          <span id="stats-rate" class="metric-val">2.4M iter</span>
+        </div>
+        <div class="metric-item">
+          <i class="fas fa-feather-pointed"></i>
+          <span>Lyapunov Divergence:</span>
+          <span id="stats-divergence" class="metric-val">0.000</span>
+        </div>
+      </div>
+
+      <a href="https://github.com/Sheng254/ChaosVision" target="_blank" rel="noopener noreferrer" class="creator-badge">
+        <i class="fab fa-github"></i>
+        <span>ChaosVision · © 2026 Sheng254</span>
+      </a>
+    </div>
+
+    <!-- User Guide and Studio Tutorial Modal (How to use) -->
+    <div id="tutorial-modal" class="modal-overlay">
+      <div class="modal-card" style="max-width: 840px;">
+        <div class="modal-header">
+          <h2><i class="fas fa-book-open"></i> Studio Guide and Tutorial</h2>
+          <button id="tutorial-modal-close" class="modal-close" data-tooltip="Close tutorial"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="tutorial-grid">
+            <div class="tutorial-card">
+              <div class="tutorial-card-icon"><i class="fas fa-compass"></i></div>
+              <h3>1. 3D Camera and Navigation</h3>
+              <p>Navigate and inspect the dynamical patterns from any perspective:</p>
+              <ul>
+                <li><strong>3D Orbit / Rotate:</strong> Left-click and drag anywhere on the canvas</li>
+                <li><strong>Pan View:</strong> Right-click and drag, or Shift + Drag</li>
+                <li><strong>Zoom In / Out:</strong> Mouse wheel scroll or trackpad pinch</li>
+                <li><strong>Recenter Camera:</strong> Click "Recenter" in the top bar or press <kbd>R</kbd></li>
+              </ul>
+            </div>
+
+            <div class="tutorial-card">
+              <div class="tutorial-card-icon"><i class="fas fa-sliders"></i></div>
+              <h3>2. The Dynamical Control Deck</h3>
+              <p>Fine-tune the mathematical physics in real time:</p>
+              <ul>
+                <li><strong>System Parameters:</strong> Sliders dynamically adapt to the active model</li>
+                <li><strong>Swarm Trajectories:</strong> Spawn parallel paths with 0.0001 initial offset</li>
+                <li><strong>Color Palettes:</strong> Choose from curated bioluminescent gradients</li>
+                <li><strong>Simulation Speed:</strong> Speed up or slow down integration time</li>
+              </ul>
+            </div>
+
+            <div class="tutorial-card">
+              <div class="tutorial-card-icon"><i class="fas fa-terminal"></i></div>
+              <h3>3. Custom Formula Sandbox</h3>
+              <p>Select <strong>"Custom Sandbox"</strong> from the dropdown to write your own equations:</p>
+              <ul>
+                <li>Type formulas like <code>sin(a * y) - cos(b * x)</code></li>
+                <li>Supports trigonometric, exponential, and algebraic functions</li>
+                <li>Runs with safe zero-allocation bytecode compilation at 60 FPS</li>
+              </ul>
+            </div>
+
+            <div class="tutorial-card">
+              <div class="tutorial-card-icon"><i class="fas fa-cubes"></i></div>
+              <h3>4. Audio and Studio Exports</h3>
+              <p>Immerse yourself and capture high-resolution media:</p>
+              <ul>
+                <li><strong>Audio:</strong> Click "Audio: ON" for soothing Zen singing bowls</li>
+                <li><strong>Vector SVG:</strong> Export plotter vector line drawings</li>
+                <li><strong>4K Wallpaper:</strong> Generates a pristine 3840x2160 PNG render</li>
+                <li><strong>Record Video:</strong> Live 60FPS video recording for as long as you wish</li>
+                <li><strong>Share:</strong> Copies link preserving your exact parameters</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Keyboard Shortcuts Strip -->
+          <div class="keyboard-shortcuts-strip">
+            <h4><i class="fas fa-keyboard"></i> Studio Keyboard Shortcuts</h4>
+            <div class="shortcuts-row">
+              <div class="shortcut-item"><kbd>T</kbd> <span>Open Tutorial</span></div>
+              <div class="shortcut-item"><kbd>R</kbd> <span>Recenter Camera View</span></div>
+              <div class="shortcut-item"><kbd>M</kbd> <span>Toggle Ambient Audio</span></div>
+              <div class="shortcut-item"><kbd>H</kbd> <span>Toggle Controls Drawer</span></div>
+            </div>
+          </div>
+
+          <!-- Open Source Attribution Footer Banner -->
+          <div class="modal-attribution-footer">
+            <div class="attribution-left">
+              <i class="fab fa-github" style="font-size: 20px; color: var(--accent-cyan);"></i>
+              <div>
+                <div style="font-weight: 600; color: #fff; font-size: 13px;">ChaosVision · Open Source Laboratory</div>
+                <div style="color: var(--text-muted); font-size: 11px;">Created by <strong>Sheng254</strong> under the MIT License © 2026</div>
+              </div>
+            </div>
+            <a href="https://github.com/Sheng254/ChaosVision" target="_blank" rel="noopener noreferrer" class="btn-glass btn-primary" style="padding: 6px 12px; font-size: 12px;">
+              <i class="fab fa-github"></i> Star on GitHub
+            </a>
+          </div>
         </div>
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Application Script (ES Module) -->
+    <script type="module" src="src/main.js"></script>
   </body>
 </html>
