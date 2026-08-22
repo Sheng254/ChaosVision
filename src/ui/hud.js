@@ -259,8 +259,8 @@ export class HUDController {
         deck.classList.remove('minimized');
 
         // Intelligently sync to currently active simulation on canvas
-        const activeType = this.app.currentSystemType;
-        const activeId = this.app.currentSystemId;
+        const activeType = this.app.systemType;
+        const activeId = this.app.systemId;
         const matchingIdx = MUSEUM_EXHIBITS.findIndex(ex => ex.systemType === activeType && ex.systemId === activeId);
 
         const targetIdx = matchingIdx !== -1 ? matchingIdx : this.currentExhibitIndex;
@@ -347,7 +347,7 @@ export class HUDController {
     if (!ex) return;
 
     // 1. Launch simulation live on canvas with curated look
-    this.app.loadPreset(ex);
+    this.app.applyPreset(ex);
 
     // 2. Synchronize left drawer dropdown
     const systemSelect = document.getElementById('system-select');

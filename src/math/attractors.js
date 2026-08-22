@@ -1,6 +1,6 @@
 /**
- * Comprehensive Catalog of Strange Attractors and Dynamical Systems
- * Enriched with educational parameter descriptions and descriptive titles.
+ * Catalog of strange attractors and dynamical systems.
+ * Each entry contains the derivative function, default parameters, and display metadata.
  */
 
 export const ATTRACTORS_3D = {
@@ -9,7 +9,7 @@ export const ATTRACTORS_3D = {
     name: 'Lorenz Attractor',
     category: '3D Continuous',
     author: 'Edward Lorenz (1963)',
-    description: 'The foundational model of deterministic chaos representing atmospheric convection.',
+    description: 'Foundational model of deterministic chaos representing atmospheric convection.',
     initialState: [0.1, 0.0, 0.0],
     scale: 12.5,
     center: [0, 0, 24],
@@ -21,23 +21,17 @@ export const ATTRACTORS_3D = {
     },
     paramRanges: {
       sigma: {
-        min: 0.1,
-        max: 30.0,
-        step: 0.1,
+        min: 0.1, max: 30.0, step: 0.1,
         label: 'σ · Fluid Viscosity',
         description: 'Prandtl number (viscous drag vs. thermal diffusion). Higher values stretch and accelerate the butterfly wings.'
       },
       rho: {
-        min: 0.1,
-        max: 60.0,
-        step: 0.5,
+        min: 0.1, max: 60.0, step: 0.5,
         label: 'ρ · Atmospheric Heat',
-        description: 'Rayleigh number (temperature difference). Values > 24.7 create chaos; sliding < 24.0 freezes into a calm point.'
+        description: 'Rayleigh number (temperature difference). Values > 24.7 create chaos; sliding < 24.0 freezes into a fixed point.'
       },
       beta: {
-        min: 0.1,
-        max: 10.0,
-        step: 0.05,
+        min: 0.1, max: 10.0, step: 0.05,
         label: 'β · Convection Aspect Ratio',
         description: 'Geometric height-to-width ratio of the atmospheric convection rolls.'
       }
@@ -54,61 +48,44 @@ export const ATTRACTORS_3D = {
     name: 'Aizawa Attractor',
     category: '3D Continuous',
     author: 'Yoji Aizawa (1983)',
-    description: 'Mesmerizing spherical structure with a central rotating vortex axis and toroidal orbits.',
+    description: 'Spherical strange attractor with a central rotating vortex axis and toroidal orbits.',
     initialState: [0.1, 0.0, 0.0],
     scale: 150.0,
     center: [0, 0, 0.65],
     defaultDt: 0.008,
     defaultParams: {
-      a: 0.95,
-      b: 0.7,
-      c: 0.6,
-      d: 3.5,
-      e: 0.25,
-      f: 0.1
+      a: 0.95, b: 0.7, c: 0.6, d: 3.5, e: 0.25, f: 0.1
     },
     paramRanges: {
       a: {
-        min: 0.1,
-        max: 2.0,
-        step: 0.01,
+        min: 0.1, max: 2.0, step: 0.01,
         label: 'a · Vertical Growth',
         description: 'Vertical expansion rate. Controls the height of the outer spherical shell.'
       },
       b: {
-        min: 0.1,
-        max: 1.5,
-        step: 0.01,
+        min: 0.1, max: 1.5, step: 0.01,
         label: 'b · Rotation Frequency',
         description: 'Harmonic orbital frequency of the outer wrapping shells.'
       },
       c: {
-        min: 0.0,
-        max: 1.5,
-        step: 0.01,
+        min: 0.0, max: 1.5, step: 0.01,
         label: 'c · Z-Axis Lift',
         description: 'Constant vertical lift pulling trajectories upward from the bottom pole.'
       },
       d: {
-        min: 0.5,
-        max: 6.0,
-        step: 0.05,
+        min: 0.5, max: 6.0, step: 0.05,
         label: 'd · Vortex Spin Speed',
-        description: 'Spindle spin rate. Higher values tighten the central tornado spine and spin the outer sphere faster.'
+        description: 'Spindle spin rate. Higher values tighten the central vortex and spin the outer sphere faster.'
       },
       e: {
-        min: 0.0,
-        max: 1.0,
-        step: 0.01,
+        min: 0.0, max: 1.0, step: 0.01,
         label: 'e · Radial Coupling',
         description: 'Couples horizontal width with vertical height, shaping the spherical bulb.'
       },
       f: {
-        min: 0.0,
-        max: 0.5,
-        step: 0.01,
+        min: 0.0, max: 0.5, step: 0.01,
         label: 'f · Cubic Nonlinearity',
-        description: 'High-order non-linear distortion warping the equator of the sphere.'
+        description: 'High-order nonlinear distortion warping the equator of the sphere.'
       }
     },
     derivative: ([x, y, z], { a, b, c, d, e, f }) => [
@@ -133,11 +110,9 @@ export const ATTRACTORS_3D = {
     },
     paramRanges: {
       b: {
-        min: 0.05,
-        max: 0.35,
-        step: 0.001,
+        min: 0.05, max: 0.35, step: 0.001,
         label: 'b · Energy Damping',
-        description: 'Friction coefficient. When low (~0.208), particles navigate an infinite 3D maze. Values > 0.32 freeze motion.'
+        description: 'Friction coefficient. At ~0.208, particles navigate an infinite 3D maze. Values > 0.32 freeze motion.'
       }
     },
     derivative: ([x, y, z], { b }) => [
@@ -152,37 +127,29 @@ export const ATTRACTORS_3D = {
     name: 'Rössler Attractor',
     category: '3D Continuous',
     author: 'Otto Rössler (1976)',
-    description: 'Continuous dynamical system designed to simplify the Lorenz attractor with a Möbius-like fold.',
+    description: 'Continuous dynamical system with a Möbius-like fold; a simplified analogue of the Lorenz attractor.',
     initialState: [0.1, 0.0, 0.0],
     scale: 12.0,
     center: [0, 0, 9],
     defaultDt: 0.015,
     defaultParams: {
-      a: 0.2,
-      b: 0.2,
-      c: 5.7
+      a: 0.2, b: 0.2, c: 5.7
     },
     paramRanges: {
       a: {
-        min: 0.05,
-        max: 0.5,
-        step: 0.01,
+        min: 0.05, max: 0.5, step: 0.01,
         label: 'a · Spiral Outward Rate',
         description: 'Speed at which planar spiral loops expand outward from the center.'
       },
       b: {
-        min: 0.05,
-        max: 0.5,
-        step: 0.01,
+        min: 0.05, max: 0.5, step: 0.01,
         label: 'b · Center Offset',
         description: 'Center equilibrium offset of the flat rotation plane.'
       },
       c: {
-        min: 2.0,
-        max: 14.0,
-        step: 0.1,
-        label: 'c · Fold / Catapult Height',
-        description: 'Critical threshold that catapults outer loops vertically before folding them back down.'
+        min: 2.0, max: 14.0, step: 0.1,
+        label: 'c · Fold Height',
+        description: 'Threshold that launches outer loops vertically before folding them back down.'
       }
     },
     derivative: ([x, y, z], { a, b, c }) => [
@@ -203,29 +170,21 @@ export const ATTRACTORS_3D = {
     center: [0, 0, 20],
     defaultDt: 0.004,
     defaultParams: {
-      a: 35.0,
-      b: 3.0,
-      c: 28.0
+      a: 35.0, b: 3.0, c: 28.0
     },
     paramRanges: {
       a: {
-        min: 20.0,
-        max: 50.0,
-        step: 0.5,
+        min: 20.0, max: 50.0, step: 0.5,
         label: 'a · Dual Vortex Strength',
-        description: 'Controls the attraction velocity pulling orbits into both hyperbolic vortex hubs.'
+        description: 'Attraction velocity toward both hyperbolic vortex hubs.'
       },
       b: {
-        min: 1.0,
-        max: 6.0,
-        step: 0.1,
+        min: 1.0, max: 6.0, step: 0.1,
         label: 'b · Vertical Dissipation',
         description: 'Damping along the central Z-axis bridge connecting the two scrolls.'
       },
       c: {
-        min: 15.0,
-        max: 40.0,
-        step: 0.5,
+        min: 15.0, max: 40.0, step: 0.5,
         label: 'c · Cross-Scroll Coupling',
         description: 'Instability strength that forces orbits to jump across the dual scrolls.'
       }
@@ -241,7 +200,7 @@ export const ATTRACTORS_3D = {
     id: 'halvorsen',
     name: 'Halvorsen Attractor',
     category: '3D Continuous',
-    author: 'Halvorsen (1889)',
+    author: 'Halvorsen',
     description: 'Tri-symmetric cyclic chaotic structure with intertwining orbital wings.',
     initialState: [-1.48, -1.24, -1.0],
     scale: 18.0,
@@ -252,11 +211,9 @@ export const ATTRACTORS_3D = {
     },
     paramRanges: {
       a: {
-        min: 1.2,
-        max: 2.5,
-        step: 0.01,
+        min: 1.2, max: 2.5, step: 0.01,
         label: 'a · Tri-Wing Friction',
-        description: 'Symmetric dissipation. Lower values expand the 3 cyclic leaves into a wide, luminous knot.'
+        description: 'Symmetric dissipation. Lower values expand the 3 cyclic leaves into a wide orbital knot.'
       }
     },
     derivative: ([x, y, z], { a }) => [
@@ -273,39 +230,26 @@ export const ATTRACTORS_2D = {
     name: 'Clifford Attractor',
     category: '2D Discrete Map',
     author: 'Clifford Pickover (1988)',
-    description: 'Iterated sine and cosine map yielding intricate smoke-like topological density ribbons.',
-    defaultParams: {
-      a: -1.4,
-      b: 1.6,
-      c: 1.0,
-      d: 0.7
-    },
+    description: 'Iterated sine-cosine map yielding intricate density ribbons.',
+    defaultParams: { a: -1.4, b: 1.6, c: 1.0, d: 0.7 },
     paramRanges: {
       a: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'a · X-Wave Phase',
-        description: 'Primary horizontal sinusoidal frequency. Unravels and twists the gossamer filaments.'
+        description: 'Primary horizontal sinusoidal frequency. Unravels and twists the filaments.'
       },
       b: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'b · Y-Wave Phase',
         description: 'Primary vertical sinusoidal frequency. Controls vertical ribbon curvature.'
       },
       c: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'c · X-Harmonic Weight',
         description: 'Amplitude of the horizontal cosine harmonic term.'
       },
       d: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'd · Y-Harmonic Weight',
         description: 'Amplitude of the vertical cosine harmonic term.'
       }
@@ -322,41 +266,28 @@ export const ATTRACTORS_2D = {
     name: 'Peter de Jong Attractor',
     category: '2D Discrete Map',
     author: 'Peter de Jong (1991)',
-    description: 'Harmonic difference mapping generating crystalline geometric chaos with silk-like depth.',
-    defaultParams: {
-      a: 1.4,
-      b: -2.3,
-      c: 2.4,
-      d: -2.1
-    },
+    description: 'Harmonic difference mapping generating geometric chaos with crystalline depth.',
+    defaultParams: { a: 1.4, b: -2.3, c: 2.4, d: -2.1 },
     paramRanges: {
       a: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'a · Primary X Frequency',
         description: 'Tuning of the first trigonometric difference component.'
       },
       b: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'b · X-Fold Frequency',
-        description: 'Interference frequency that stretches and pleats the translucent silk sheet.'
+        description: 'Interference frequency that stretches and pleats the pattern.'
       },
       c: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'c · Primary Y Frequency',
         description: 'Tuning of the second trigonometric difference component.'
       },
       d: {
-        min: -3.0,
-        max: 3.0,
-        step: 0.05,
+        min: -3.0, max: 3.0, step: 0.05,
         label: 'd · Y-Fold Frequency',
-        description: 'Interference frequency that opens and closes geometric flower petals.'
+        description: 'Interference frequency that opens and closes the geometric pattern.'
       }
     },
     scale: 0.20,
@@ -371,41 +302,28 @@ export const ATTRACTORS_2D = {
     name: 'Tinkerbell Map',
     category: '2D Discrete Map',
     author: 'Nusse & Yorke (1998)',
-    description: 'Chaotic quadratic polynomial map whose trajectory resembles the trajectory of a fluttering fairy.',
-    defaultParams: {
-      a: 0.9,
-      b: -0.6013,
-      c: 2.0,
-      d: 0.5
-    },
+    description: 'Chaotic quadratic polynomial map named for the erratic trajectory shape.',
+    defaultParams: { a: 0.9, b: -0.6013, c: 2.0, d: 0.5 },
     paramRanges: {
       a: {
-        min: 0.1,
-        max: 1.5,
-        step: 0.01,
+        min: 0.1, max: 1.5, step: 0.01,
         label: 'a · Horizontal Wing Spread',
-        description: 'Linear horizontal drift spreading the fairy wings outward.'
+        description: 'Linear horizontal drift spreading the wings outward.'
       },
       b: {
-        min: -1.0,
-        max: 0.0,
-        step: 0.01,
+        min: -1.0, max: 0.0, step: 0.01,
         label: 'b · Wing Stability',
-        description: 'Crucial stability threshold. Values below -0.62 shatter the wings into chaotic dispersion.'
+        description: 'Stability threshold. Values below -0.62 shatter the wings into chaotic dispersion.'
       },
       c: {
-        min: 0.5,
-        max: 3.0,
-        step: 0.05,
+        min: 0.5, max: 3.0, step: 0.05,
         label: 'c · Cross-Shear Coupling',
         description: 'Coupling between horizontal and vertical polynomial terms.'
       },
       d: {
-        min: 0.1,
-        max: 1.0,
-        step: 0.01,
+        min: 0.1, max: 1.0, step: 0.01,
         label: 'd · Vertical Drift',
-        description: 'Vertical damping coefficient preserving flight stability.'
+        description: 'Vertical damping coefficient.'
       }
     },
     scale: 0.28,
@@ -420,33 +338,23 @@ export const ATTRACTORS_2D = {
     name: 'Ikeda Map',
     category: '2D Discrete Map',
     author: 'Kensuke Ikeda (1979)',
-    description: 'Models a pulse of light traversing a nonlinear optical resonator containing a ring cavity.',
-    defaultParams: {
-      u: 0.9,
-      k: 0.4,
-      p: 6.0
-    },
+    description: 'Models a pulse of light traversing a nonlinear optical ring cavity.',
+    defaultParams: { u: 0.9, k: 0.4, p: 6.0 },
     paramRanges: {
       u: {
-        min: 0.5,
-        max: 0.99,
-        step: 0.01,
-        label: 'u · Laser Mirror Reflectivity',
-        description: 'Cavity mirror reflectivity. Higher values sustain swirling optical chaotic spirals.'
+        min: 0.5, max: 0.99, step: 0.01,
+        label: 'u · Mirror Reflectivity',
+        description: 'Cavity mirror reflectivity. Higher values sustain chaotic optical spirals.'
       },
       k: {
-        min: 0.1,
-        max: 1.0,
-        step: 0.05,
+        min: 0.1, max: 1.0, step: 0.05,
         label: 'k · Linear Phase Delay',
         description: 'Constant optical phase delay through the ring resonator.'
       },
       p: {
-        min: 1.0,
-        max: 10.0,
-        step: 0.2,
+        min: 1.0, max: 10.0, step: 0.2,
         label: 'p · Intensity Refraction',
-        description: 'Nonlinear refractive index power. Drives high-intensity laser pulse self-focusing.'
+        description: 'Nonlinear refractive index power. Drives intensity-dependent self-focusing.'
       }
     },
     scale: 0.38,
@@ -464,33 +372,23 @@ export const ATTRACTORS_2D = {
     name: 'Gumowski-Mira Map',
     category: '2D Discrete Map',
     author: 'Igor Gumowski & Christian Mira (1980)',
-    description: 'Non-invertible 2D mapping originating from high-energy accelerator particle physics at CERN.',
-    defaultParams: {
-      alpha: 0.008,
-      beta: 0.05,
-      mu: -0.49
-    },
+    description: 'Non-invertible 2D mapping from particle beam stability analysis at CERN.',
+    defaultParams: { alpha: 0.008, beta: 0.05, mu: -0.49 },
     paramRanges: {
       alpha: {
-        min: -0.1,
-        max: 0.1,
-        step: 0.001,
+        min: -0.1, max: 0.1, step: 0.001,
         label: 'α · Beam Perturbation',
         description: 'Relativistic synchrotron beam trajectory perturbation.'
       },
       beta: {
-        min: -0.1,
-        max: 0.1,
-        step: 0.005,
+        min: -0.1, max: 0.1, step: 0.005,
         label: 'β · Nonlinear Dispersion',
-        description: 'Quadratic damping factor stabilizing particle accelerator beam dispersion.'
+        description: 'Quadratic damping factor stabilising beam dispersion.'
       },
       mu: {
-        min: -1.0,
-        max: 1.0,
-        step: 0.01,
-        label: 'μ · Stability Island Bifurcation',
-        description: 'Critical stability multiplier. Splits single particle orbits into intricate multi-island dendrites.'
+        min: -1.0, max: 1.0, step: 0.01,
+        label: 'μ · Stability Bifurcation',
+        description: 'Critical stability multiplier. Splits single orbits into multi-island patterns.'
       }
     },
     scale: 0.035,
@@ -500,5 +398,36 @@ export const ATTRACTORS_2D = {
       const nextY = -x + f(nextX);
       return [nextX, nextY];
     }
+  },
+
+  hopalong: {
+    id: 'hopalong',
+    name: 'Hopalong Attractor',
+    category: '2D Discrete Map',
+    author: 'Barry Martin (1989)',
+    description: 'Fractal hopping iteration producing intricate web-like orbital lattices.',
+    defaultParams: { a: 2.0, b: 1.0, c: 0.0 },
+    paramRanges: {
+      a: {
+        min: -5.0, max: 5.0, step: 0.1,
+        label: 'a · Primary Offset',
+        description: 'Linear coordinate shift.'
+      },
+      b: {
+        min: 0.1, max: 5.0, step: 0.1,
+        label: 'b · Inner Scale',
+        description: 'Scaling factor inside the radical.'
+      },
+      c: {
+        min: -5.0, max: 5.0, step: 0.1,
+        label: 'c · Shift Constant',
+        description: 'Constant displacement inside square root.'
+      }
+    },
+    scale: 0.05,
+    iterate: (x, y, { a, b, c }) => [
+      y - Math.sign(x) * Math.sqrt(Math.abs(b * x - c)),
+      a - x
+    ]
   }
 };

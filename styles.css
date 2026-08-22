@@ -29,7 +29,6 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  user-select: none;
 }
 
 body, html {
@@ -42,6 +41,11 @@ body, html {
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   touch-action: none;
+  user-select: none;
+}
+
+input, textarea, select, [contenteditable] {
+  user-select: auto;
 }
 
 /* Fullscreen Canvas */
@@ -153,18 +157,6 @@ body, html {
   color: var(--accent-green);
 }
 
-.btn-glass.recording {
-  background: rgba(255, 0, 127, 0.25);
-  border-color: var(--accent-pink);
-  color: #fff;
-  animation: recBlink 1s infinite alternate;
-}
-
-@keyframes recBlink {
-  0% { box-shadow: 0 0 4px var(--accent-pink); }
-  100% { box-shadow: 0 0 16px var(--accent-pink); }
-}
-
 /* Rich Floating Tooltip System */
 [data-tooltip] {
   position: relative;
@@ -173,9 +165,9 @@ body, html {
 [data-tooltip]::before {
   content: attr(data-tooltip);
   position: absolute;
-  bottom: -38px;
+  bottom: calc(100% + 8px);
   left: 50%;
-  transform: translateX(-50%) translateY(-4px);
+  transform: translateX(-50%) translateY(4px);
   background: rgba(13, 13, 22, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -195,6 +187,17 @@ body, html {
 }
 
 [data-tooltip]:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.top-nav [data-tooltip]::before {
+  bottom: auto;
+  top: calc(100% + 8px);
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.top-nav [data-tooltip]:hover::before {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
@@ -235,7 +238,7 @@ body, html {
   position: absolute;
   top: 86px;
   left: 16px;
-  width: 330px;
+  width: 360px;
   max-height: calc(100vh - 106px);
   background: var(--panel-bg);
   backdrop-filter: blur(24px);
@@ -361,29 +364,66 @@ body, html {
 }
 
 input[type="range"] {
+  width: 100%;
   flex: 1;
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
-  border-radius: 2px;
+  height: 6px;
+  border-radius: 3px;
   background: rgba(255, 255, 255, 0.12);
   outline: none;
+  margin: 6px 0;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+}
+
+input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
   background: var(--accent-cyan);
   cursor: pointer;
-  box-shadow: 0 0 8px var(--accent-cyan);
-  transition: transform 0.1s ease;
+  box-shadow: 0 0 10px var(--accent-cyan);
+  margin-top: -4.5px;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--accent-cyan);
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
+  transform: scale(1.2);
+  box-shadow: 0 0 14px var(--accent-cyan);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px var(--accent-cyan);
 }
 
 .param-num-val {
@@ -394,36 +434,218 @@ input[type="range"]::-webkit-slider-thumb:hover {
   text-align: right;
 }
 
-/* Custom Formula Sandbox */
+/* Custom Formula Sandbox (Interactive Equation Editor) */
 #custom-formula-section {
   display: none;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--panel-border);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border-glow);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.formula-input {
-  width: 100%;
-  background: rgba(0, 0, 0, 0.4);
+.sandbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.btn-icon-subtle {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-icon-subtle:hover, .btn-icon-subtle.active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.math-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  background: rgba(0, 0, 0, 0.45);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  padding: 4px 8px;
+  min-height: 38px;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.math-row:focus-within {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+}
+
+.math-eq-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
   color: var(--accent-cyan);
+  padding: 2px 6px;
+  min-width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+  background: rgba(0, 242, 254, 0.1);
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.math-eq-label sub {
+  font-size: 8px;
+  color: var(--text-muted);
+}
+
+.btn-remove-eq {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-remove-eq:hover {
+  color: var(--accent-pink);
+  background: rgba(255, 0, 127, 0.15);
+}
+
+.btn-add-eq {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+  justify-content: center;
+  margin-bottom: 8px;
+  border-style: dashed;
+}
+
+.btn-add-eq:hover {
+  border-style: solid;
+}
+
+/* MathLive Visual MathField (Compact & Sleek) */
+math-field.custom-math-field {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #fff;
+  padding: 0 4px;
+  font-size: 13px;
+  outline: none;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  --primary: var(--accent-cyan);
+  --highlight-color: transparent !important;
+  --contains-highlight-background-color: transparent !important;
+  --contains-highlight-backround-color: transparent !important;
+  --selection-background-color: rgba(0, 242, 254, 0.25) !important;
+  --selection-color: #fff !important;
+  --text-color: #fff !important;
+  --caret-color: var(--accent-cyan) !important;
+  --placeholder-color: rgba(255, 255, 255, 0.35) !important;
+  --smart-fence-color: var(--accent-cyan) !important;
+  --smart-fence-opacity: 0.8 !important;
+}
+
+/* Suppress all light-mode highlight and prompt boxes */
+math-field.custom-math-field::part(content) [class*="highlight"],
+math-field.custom-math-field::part(content) .ML__highlight,
+math-field.custom-math-field [class*="highlight"],
+math-field.custom-math-field .ML__highlight {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Hide cluttering default MathLive action buttons */
+math-field::part(virtual-keyboard-toggle),
+math-field::part(menu-toggle),
+math-field [part="virtual-keyboard-toggle"],
+math-field [part="menu-toggle"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Collapsible Virtual Math Keypad */
+.math-keypad-container {
+  margin-top: 8px;
+  background: rgba(5, 5, 10, 0.7);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  max-height: 220px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+}
+
+.math-keypad-container.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 8px;
+  margin-top: 0;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 4px;
+}
+
+.keypad-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text-main);
   font-family: var(--font-mono);
   font-size: 12px;
-  margin-bottom: 6px;
-  outline: none;
+  padding: 6px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 }
 
-.formula-input:focus {
+.keypad-btn:hover {
+  background: rgba(0, 242, 254, 0.15);
   border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  transform: translateY(-1px);
 }
 
-#formula-error {
-  font-size: 11px;
-  margin-top: 4px;
+.keypad-btn:active {
+  transform: translateY(0);
+}
+
+.formula-status {
   font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 6px;
+  min-height: 16px;
+  transition: color 0.2s ease;
 }
 
 /* ===================================================
@@ -985,7 +1207,7 @@ kbd {
 }
 
 /* ===================================================
-   WORLD-CLASS RESPONSIVE SYSTEM (Desktops, Tablets & Mobile)
+   RESPONSIVE SYSTEM (Desktops, Tablets & Mobile)
    =================================================== */
 
 /* Tablets, iPads & Laptops (<= 1024px) */
@@ -1101,8 +1323,9 @@ kbd {
     width: auto;
     left: 8px;
     right: 8px;
-    bottom: 8px;
-    max-height: 58dvh;
+    top: 64px;
+    bottom: auto;
+    max-height: calc(100dvh - 100px);
     border-radius: var(--radius-lg);
     z-index: 25;
   }
@@ -1112,6 +1335,8 @@ kbd {
     left: 8px;
     right: 8px;
     max-height: 48px;
+    top: 64px;
+    bottom: auto;
   }
 
   .deck-header {

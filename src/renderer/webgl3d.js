@@ -1,6 +1,5 @@
 /**
- * High-Performance 3D Dynamical Trajectory & Particle Swarm Engine
- * Perfectly auto-framed perspective projection with rounded anti-aliased trails.
+ * 3D Dynamical Trajectory & Particle Swarm Renderer
  */
 
 import { samplePalette } from '../config/palettes.js';
@@ -12,50 +11,39 @@ export class Trajectory3DRenderer {
     this.fov = 600;
   }
 
-  resize(width, height) {
-    this.canvas.width = width;
-    this.canvas.height = height;
-  }
-
   clear() {
     this.ctx.fillStyle = '#05050a';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
   }
 
   fade(fadeAlpha = 0.06) {
     this.ctx.save();
     this.ctx.globalCompositeOperation = 'source-over';
     this.ctx.fillStyle = `rgba(5, 5, 10, ${fadeAlpha})`;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0, 0, this.canvas.clientWidth, this.canvas.clientHeight);
     this.ctx.restore();
   }
 
-  /**
-   * Projects a 3D point (x, y, z) into 2D screen coordinates with camera transform.
-   */
   project(point, camera, center = [0, 0, 0], scale = 1.0) {
-    const { width, height } = this.canvas;
+    const width = this.canvas.clientWidth;
+    const height = this.canvas.clientHeight;
     const cx = width / 2 + (camera.panX || 0);
     const cy = height / 2 + (camera.panY || 0);
 
-    // Shift relative to attractor center
     const x0 = (point[0] - center[0]) * scale * (camera.zoom || 1.0);
     const y0 = (point[1] - center[1]) * scale * (camera.zoom || 1.0);
     const z0 = (point[2] - center[2]) * scale * (camera.zoom || 1.0);
 
-    // Rotate around Y-axis
     const cosY = Math.cos(camera.rotY || 0);
     const sinY = Math.sin(camera.rotY || 0);
     const x1 = x0 * cosY + z0 * sinY;
     const z1 = -x0 * sinY + z0 * cosY;
 
-    // Rotate around X-axis
     const cosX = Math.cos(camera.rotX || 0);
     const sinX = Math.sin(camera.rotX || 0);
     const y2 = y0 * cosX - z1 * sinX;
     const z2 = y0 * sinX + z1 * cosX;
 
-    // Perspective projection
     const distance = 800;
     const pz = z2 + distance;
     if (pz <= 20) return null;
@@ -67,9 +55,6 @@ export class Trajectory3DRenderer {
     return { px, py, pz, z2 };
   }
 
-  /**
-   * Renders continuous 3D attractor trajectory ribbons and swarm trails with smooth anti-aliasing.
-   */
   renderTrajectories(trajectories, camera, center, scale, paletteId = 'bioluminescence') {
     const ctx = this.ctx;
     ctx.save();
@@ -86,7 +71,7 @@ export class Trajectory3DRenderer {
       let hasStarted = false;
 
       for (let i = 0; i < trail.length; i++) {
-        const pt = this.project(trail[i], camera, center, scale);
+        const pt = this.project(trail.get(i), camera, center, scale);
         if (!pt) {
           hasStarted = false;
           continue;
@@ -106,7 +91,6 @@ export class Trajectory3DRenderer {
       ctx.lineWidth = (t === 0) ? 1.8 : 1.2;
       ctx.stroke();
 
-      // Leading glowing particle head
       const headPt = this.project(traj.state, camera, center, scale);
       if (headPt) {
         const headRadius = (t === 0) ? 4.0 : 2.5;
@@ -125,22 +109,19 @@ export class Trajectory3DRenderer {
     ctx.restore();
   }
 
-  /**
-   * Renders Double Pendulum perfectly auto-framed on screen in 3D.
-   */
   renderDoublePendulum(pendulums, camera, paletteId = 'solarFlare', showRods = true) {
     const ctx = this.ctx;
-    const { width, height } = this.canvas;
+    const width = this.canvas.clientWidth;
+    const height = this.canvas.clientHeight;
     const rodScale = Math.min(width, height) * 0.175;
-    const center = [0, 0.0, 0]; // Center point of the canvas
-    const anchorY = 0.55; // Slightly elevated anchor so lower swing never clips
+    const center = [0, 0.0, 0];
+    const anchorY = 0.55;
 
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // 1. Glowing chaos trails projected in 3D
     for (let i = 0; i < pendulums.length; i++) {
       const p = pendulums[i];
       const trail = p.trail;
@@ -150,7 +131,8 @@ export class Trajectory3DRenderer {
       let hasStarted = false;
 
       for (let j = 0; j < trail.length; j++) {
-        const pt3D = [trail[j].x, anchorY - trail[j].y, 0];
+        const trailPt = trail.get(j);
+        const pt3D = [trailPt.x, anchorY - trailPt.y, 0];
         const pt = this.project(pt3D, camera, center, rodScale);
         if (!pt) {
           hasStarted = false;
@@ -171,7 +153,6 @@ export class Trajectory3DRenderer {
       ctx.stroke();
     }
 
-    // 2. Physical rods & bobs for the primary pendulum in 3D
     if (showRods && pendulums.length > 0) {
       ctx.globalCompositeOperation = 'source-over';
       const primary = pendulums[0];
@@ -185,13 +166,11 @@ export class Trajectory3DRenderer {
       const bob2 = this.project([x2, anchorY - y2, 0], camera, center, rodScale);
 
       if (anchor && bob1 && bob2) {
-        // Base anchor
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(anchor.px, anchor.py, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Rod 1
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
@@ -199,13 +178,11 @@ export class Trajectory3DRenderer {
         ctx.lineTo(bob1.px, bob1.py);
         ctx.stroke();
 
-        // Bob 1
         ctx.fillStyle = samplePalette(paletteId, 0.2, 1.0);
         ctx.beginPath();
         ctx.arc(bob1.px, bob1.py, 7, 0, Math.PI * 2);
         ctx.fill();
 
-        // Rod 2
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.lineWidth = 2.0;
         ctx.beginPath();
@@ -213,7 +190,6 @@ export class Trajectory3DRenderer {
         ctx.lineTo(bob2.px, bob2.py);
         ctx.stroke();
 
-        // Bob 2 (Glowing tip)
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
         ctx.arc(bob2.px, bob2.py, 8, 0, Math.PI * 2);

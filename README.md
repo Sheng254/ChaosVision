@@ -34,17 +34,18 @@ Built with native ECMAScript modules, direct HTML5 Canvas projection pipelines, 
 ## Key Features
 
 ### 1. High-Precision Numerical Integrators & Dynamics
-* **Runge-Kutta 4th-Order (RK4) Solver**: High-precision numerical integration for continuous differential equations.
+* **Runge-Kutta 4th-Order (RK4) Solver**: High-precision numerical integration for continuous differential equations with finite-number boundary recovery.
 * **Lagrangian Dynamics Engine**: Simulates multi-pendulum mechanical systems with 16 sub-steps per frame to prevent energy drift.
-* **Safe AST Formula Sandbox**: Tokenizes and compiles custom mathematical equations into native machine bytecode for real-time evaluation.
+* **Visual Equation Editor & Multi-Equation AST Sandbox**: Real-time visual math input with formatted LaTeX translation, 2D/3D multi-equation compiling ($x_{n+1}, y_{n+1}, z_{n+1}$), and automatic parameter binding.
 * **Lyapunov Divergence Tracking**: Calculates Euclidean phase-space separation across parallel trajectories initialized with microscopic $10^{-4}$ offsets.
-* **Feigenbaum Period-Doubling Cascade**: Interactive bifurcation explorer with progressive zoom into universal fractal windows ($\delta \approx 4.6692016$).
+* **3D Phase-Space Feigenbaum Bifurcation Cascade**: Canonical $(r, x_n, x_{n-1})$ delay-coordinate embedding combining classical 2D diagrams with 3D period-doubling spatial manifolds.
+* **Anti-Stall & Anti-Collapse Watchdog**: Real-time velocity monitoring prevents discrete maps from collapsing into single-point equilibrium traps.
 
-### 2. Rendering & Camera Architecture
+### 2. Unified Rendering & Camera Architecture
 * **High-Density Density Accumulator**: Accumulates millions of particle iterations with logarithmic exposure tone-mapping.
-* **3D Perspective Projection Engine**: Full 3-axis rotation, panning, and perspective scaling for continuous ribbons and discrete maps.
-* **Inertial 60/120Hz Multi-Touch Camera**: Smooth orbit navigation with velocity tracking, momentum release gliding, and dual-finger pinch zoom.
-* **Curated Designer Color Gradients**: Bioluminescence, Cyberpunk, CRT Phosphor, Solar Flare, Cosmic Nebula, Electric Amethyst, and Infrared.
+* **Unified 3D Perspective Projection Engine**: Full 3-axis pitch, yaw, pan, and perspective scaling across continuous attractors, discrete maps, pendulums, and bifurcations.
+* **Inertial 60/120Hz Multi-Touch Camera**: Smooth orbit navigation with velocity tracking, momentum gliding, shift-drag panning, and dual-finger pinch zoom.
+* **Curated Designer Color Gradients**: Bioluminescence, Cyberpunk, CRT Matrix Green, Solar Flare, Cosmic Nebula, Electric Amethyst, and Infrared.
 
 ### 3. Generative Zen Soundscapes (Web Audio API)
 * **8-Voice Polyphonic Voice Pool**: Discrete decaying singing bowl and crystal chime plucks.
@@ -57,10 +58,9 @@ Built with native ECMAScript modules, direct HTML5 Canvas projection pipelines, 
 * **Two-Way Control Sync**: Switching systems in the control drawer updates the tour card instantly, and navigating exhibits updates the drawer.
 
 ### 5. Studio Exporters & State Serialization
-* **4K Ultra-HD Wallpaper**: Renders a dedicated $3840 \times 2160$ offscreen PNG with supersampling.
-* **Vector SVG Export**: Converts mathematical orbits into clean vector `<path>` drawings for pen plotters and laser cutters.
-* **Continuous 60FPS Video Recorder**: Records high-bitrate WebM video for any user-defined duration.
-* **Shareable URL Hash State**: Encodes all parameters, color ramps, and camera angles into a compressed URL hash.
+* **4K Ultra-HD Wallpaper**: Asynchronously renders a dedicated $3840 \times 2160$ offscreen PNG with supersampling off the main JS thread.
+* **Universal Vector SVG Export**: Converts continuous 3D orbital loops, 20,000-point discrete maps, pendulums, and bifurcations into publication-ready `<path>` and `<circle>` vector artwork without artifacts.
+* **High-Fidelity Shareable URL State**: Serializes multi-equations, math variables, camera transform, speed, decay, and color ramps with strict parameter schema isolation.
 
 ---
 
@@ -73,15 +73,16 @@ Built with native ECMAScript modules, direct HTML5 Canvas projection pipelines, 
 | **Thomas Labyrinth** | 3D Continuous | $\dot{x} = \sin(y) - bx, \dot{y} = \sin(z) - by, \dot{z} = \sin(x) - bz$ | $b$ (Energy Damping / Friction) |
 | **Rössler Attractor** | 3D Continuous | $\dot{x} = -y - z, \dot{y} = x + ay, \dot{z} = b + z(x - c)$ | $a$ (Spiral), $c$ (Fold / Catapult) |
 | **Chen System** | 3D Continuous | $\dot{x} = a(y - x), \dot{y} = (c - a)x - xz + cy, \dot{z} = xy - bz$ | $a$ (Vortex), $c$ (Cross-Scroll) |
-| **Halvorsen System** | 3D Continuous | $\dot{x} = -ax - 4y - 4z - y^2, \dot{y} = -ay - 4z - 4x - z^2, \dot{z} = -az - 4x - 4y - x^2$ | $a$ (Coupling / Dissipation) |
-| **Clifford Map** | 2D Discrete | $x_{n+1} = \sin(ay_n) + c\cos(ax_n), y_{n+1} = \sin(bx_n) + d\cos(by_n)$ | $a, b, c, d$ (Wave Frequencies) |
+| **Halvorsen Attractor** | 3D Continuous | $\dot{x} = -ax - 4y - 4z - y^2, \dot{y} = -ay - 4z - 4x - z^2, \dot{z} = -az - 4x - 4y - x^2$ | $a$ (Coupling / Dissipation) |
 | **Peter de Jong Map** | 2D Discrete | $x_{n+1} = \sin(ay_n) - \cos(bx_n), y_{n+1} = \sin(cx_n) - \cos(dy_n)$ | $a, b, c, d$ (Interference Harmonics) |
-| **Tinkerbell Map** | 2D Discrete | $x_{n+1} = x_n^2 - y_n^2 + ax_n + by_n, y_{n+1} = 2x_n y_n + cx_n + dy_n$ | $a, b, c, d$ (Quadratic Shear) |
-| **Ikeda Optical Map** | 2D Discrete | $t = k - \frac{p}{1+x^2+y^2}, x_{n+1} = 1+u(x\cos t - y\sin t), y_{n+1} = u(x\sin t + y\cos t)$ | $u$ (Reflectivity), $p$ (Refraction) |
+| **Clifford Map** | 2D Discrete | $x_{n+1} = \sin(ay_n) + c\cos(ax_n), y_{n+1} = \sin(bx_n) + d\cos(by_n)$ | $a, b, c, d$ (Toroidal Frequencies) |
+| **Hopalong Attractor** | 2D Discrete | $x_{n+1} = y_n - \operatorname{sgn}(x_n)\sqrt{\|bx_n - c\|}, y_{n+1} = a - x_n$ | $a, b, c$ (Fractal Displacement) |
+| **Ikeda Map** | 2D Discrete | $t = k - \frac{p}{1+x^2+y^2}, x_{n+1} = 1+u(x\cos t - y\sin t), y_{n+1} = u(x\sin t + y\cos t)$ | $u$ (Reflectivity), $p$ (Refraction) |
 | **Gumowski-Mira Map** | 2D Discrete | $x_{n+1} = y + \alpha(1-\beta y^2)y + F(x), y_{n+1} = -x + F(x_{n+1})$ | $\alpha$ (Perturbation), $\mu$ (Stability) |
+| **Tinkerbell Map** | 2D Discrete | $x_{n+1} = x_n^2 - y_n^2 + ax_n + by_n, y_{n+1} = 2x_n y_n + cx_n + dy_n$ | $a, b, c, d$ (Quadratic Shear) |
 | **Double Pendulum** | Lagrangian Mechanics | $L = T - V$ evaluated via 4th-order Runge-Kutta equations of motion | Gravity ($g$), Friction, Swarm Count |
-| **Logistic Bifurcation** | 1D Fractal Cascade | $x_{n+1} = r \cdot x_n(1 - x_n)$ across parameter window $r \in [2.4, 4.0]$ | Parameter growth rate ($r$) |
-| **Custom Sandbox** | Bytecode Evaluator | Safe algebraic/trigonometric expressions evaluated in zero-allocation loops | Dynamic user parameters ($a, b, c, d$) |
+| **Feigenbaum Cascade** | 3D Delay Manifold | $x_{n+1} = r \cdot x_n(1 - x_n)$ in 3D delay embedding $(r, x_n, x_{n-1})$ | Growth rate ($r$), Settle, Samples |
+| **Custom Sandbox** | Multi-Equation AST | Real-time visual math inputs ($x_{n+1}, y_{n+1}, z_{n+1}$) with automatic parameter binding | User variables ($a, b, c, \dots$) |
 
 ---
 
@@ -102,20 +103,20 @@ ChaosVision/
     │   ├── palettes.js     # Curated mathematical color gradient definitions
     │   └── presets.js      # Exhibition catalog and editorial educational metadata
     ├── math/
-    │   ├── rk4.js          # Runge-Kutta 4th-Order numerical integrator
+    │   ├── rk4.js          # Runge-Kutta 4th-Order numerical integrator & swarm buffer
     │   ├── attractors.js   # Continuous and discrete mathematical system catalog
     │   ├── pendulum.js     # Lagrangian double pendulum physics solver
-    │   ├── bifurcation.js  # Feigenbaum logistic map fractal scanline engine
+    │   ├── bifurcation.js  # 3D phase-space Feigenbaum bifurcation cascade engine
     │   └── parser.js       # Safe AST tokenizer and bytecode formula compiler
     ├── renderer/
     │   ├── camera.js       # Inertial orbit camera, panning, and touch pinch zoom
-    │   ├── canvas2d.js     # High-density particle density accumulator
+    │   ├── canvas2d.js     # High-density particle density accumulator & anti-stall
     │   └── webgl3d.js      # 3D trajectory ribbons and pendulum projection engine
     ├── audio/
     │   └── sonifier.js     # Generative Web Audio API Zen soundscape
     └── ui/
         ├── hud.js          # Control deck, draggable museum tour, and tooltips
-        ├── exporter.js     # 4K wallpaper, vector SVG, and WebM video recorder
+        ├── exporter.js     # Asynchronous 4K wallpaper and universal vector SVG exporters
         └── urlState.js     # URL hash parameter serialization and decompression
 ```
 

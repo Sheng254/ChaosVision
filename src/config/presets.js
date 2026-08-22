@@ -1,6 +1,6 @@
 /**
- * World-Class Museum of Chaos & Dynamical Systems Exhibition Archive
- * Editorial science curation with structured, multi-line mathematical systems.
+ * Museum of Chaos & Dynamical Systems Exhibition Archive
+ * Educational curation with structured mathematical systems.
  */
 
 export const MUSEUM_EXHIBITS = [
@@ -8,7 +8,7 @@ export const MUSEUM_EXHIBITS = [
     id: 'lorenz',
     title: 'The Butterfly Effect (Lorenz 1963)',
     subtitle: 'How a 3-Decimal Rounding Error Destroyed Determinism',
-    author: 'Edward Lorenz (MIT Meteorologist, 1963)',
+    author: 'Edward Lorenz (MIT, 1963)',
     category: '3D Continuous Strange Attractor',
     systemType: '3d_attractor',
     systemId: 'lorenz',
@@ -171,7 +171,7 @@ export const MUSEUM_EXHIBITS = [
 
   {
     id: 'halvorsen',
-    title: 'Tri-Symmetric Vortex (Halvorsen 1889)',
+    title: 'Tri-Symmetric Vortex (Halvorsen)',
     subtitle: 'The Hypnotic 3-Winged Cosmic Knot',
     author: 'Halvorsen System',
     category: '3D Continuous Strange Attractor',

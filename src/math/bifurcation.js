@@ -1,121 +1,139 @@
 /**
- * High-Performance Interactive Logistic Map & Feigenbaum Bifurcation Explorer
- * Ultra-smooth panning, progressive zoom, and real-time fractal window inspection.
+ * Mathematical 3D Phase-Space Feigenbaum Bifurcation Cascade Engine
+ * Computes the exact delay-coordinate embedding (r, x_n, x_{n-1}) of the Logistic Map:
+ *   x_{n+1} = r * x_n * (1 - x_n)
+ *
+ * Clean, pure generative visualization consistent with all other strange attractors.
  */
+
+import { samplePalette, COLOR_PALETTES } from '../config/palettes.js';
 
 export class BifurcationExplorer {
   constructor() {
-    this.rMin = 2.4;
-    this.rMax = 4.0;
-    this.xMin = 0.0;
-    this.xMax = 1.0;
-    this.targetRMin = this.rMin;
-    this.targetRMax = this.rMax;
-    this.settleIterations = 180;
-    this.sampleIterations = 180;
+    this.settleIterations = 300;
+    this.sampleIterations = 220;
+    this.pointsCache = null;
+    this.lastParamsHash = '';
   }
 
   /**
-   * Smoothly pans the parameter window horizontally.
+   * Generates or retrieves the high-precision 3D phase-space point cloud.
    */
-  pan(deltaXPercent) {
-    const span = this.targetRMax - this.targetRMin;
-    const shift = span * deltaXPercent;
-    this.targetRMin = Math.max(0.0, this.targetRMin - shift);
-    this.targetRMax = Math.min(4.0, this.targetRMax - shift);
+  computePoints(numColumns = 750) {
+    const hash = `${numColumns}_${this.settleIterations}_${this.sampleIterations}`;
+    if (this.pointsCache && this.lastParamsHash === hash) {
+      return this.pointsCache;
+    }
+
+    const points = [];
+    const rStart = 2.4;
+    const rEnd = 4.0;
+    const rStep = (rEnd - rStart) / numColumns;
+    const settle = this.settleIterations;
+    const samples = this.sampleIterations;
+
+    for (let col = 0; col < numColumns; col++) {
+      const r = rStart + col * rStep;
+      let x = 0.5;
+
+      // Settle iterations to discard transient behavior
+      for (let i = 0; i < settle; i++) {
+        x = r * x * (1.0 - x);
+      }
+
+      // Sample attractor points in (r, x_n, x_{n-1}) delay embedding
+      let prevX = x;
+      for (let i = 0; i < samples; i++) {
+        const nextX = r * prevX * (1.0 - prevX);
+
+        // 3D coordinates centered at origin:
+        // X: Parameter r (scaled)
+        // Y: State x_n
+        // Z: Delay state x_{n-1}
+        const px = (r - 3.2) * 320;
+        const py = (nextX - 0.5) * 380;
+        const pz = (prevX - 0.5) * 380;
+
+        points.push([px, py, pz, r, nextX]);
+        prevX = nextX;
+      }
+    }
+
+    this.pointsCache = points;
+    this.lastParamsHash = hash;
+    return points;
   }
 
   /**
-   * Smoothly zooms centered at the cursor position.
+   * Resets any cached data to force recomputation.
    */
-  zoom(factor, centerPercent = 0.5) {
-    const span = this.targetRMax - this.targetRMin;
-    const centerR = this.targetRMin + span * centerPercent;
-    const newSpan = Math.max(0.0005, Math.min(4.0, span * factor));
-
-    this.targetRMin = Math.max(0.0, centerR - newSpan * centerPercent);
-    this.targetRMax = Math.min(4.0, centerR + newSpan * (1 - centerPercent));
-  }
-
   reset() {
-    this.targetRMin = 2.4;
-    this.targetRMax = 4.0;
-    this.targetXMin = 0.0;
-    this.targetXMax = 1.0;
+    this.pointsCache = null;
   }
 
   /**
-   * Renders the bifurcation diagram onto a target 2D canvas context.
+   * 3D Perspective Projection using the unified camera.
    */
-  render(ctx, width, height, color = 'rgba(0, 242, 254, 0.55)') {
-    // Smooth LERP zoom & pan interpolation
-    this.rMin += (this.targetRMin - this.rMin) * 0.18;
-    this.rMax += (this.targetRMax - this.rMax) * 0.18;
+  project(point, camera, width, height) {
+    const cx = width / 2 + (camera.panX || 0);
+    const cy = height / 2 + (camera.panY || 0);
 
+    const zoom = camera.zoom || 1.0;
+    const x0 = point[0] * zoom;
+    const y0 = point[1] * zoom;
+    const z0 = point[2] * zoom;
+
+    const cosY = Math.cos(camera.rotY || 0);
+    const sinY = Math.sin(camera.rotY || 0);
+    const x1 = x0 * cosY + z0 * sinY;
+    const z1 = -x0 * sinY + z0 * cosY;
+
+    const cosX = Math.cos(camera.rotX || 0);
+    const sinX = Math.sin(camera.rotX || 0);
+    const y2 = y0 * cosX - z1 * sinX;
+    const z2 = y0 * sinX + z1 * cosX;
+
+    const distance = 800;
+    const pz = z2 + distance;
+    if (pz <= 30) return null;
+
+    const fovScale = 600 / pz;
+    const px = cx + x1 * fovScale;
+    const py = cy - y2 * fovScale;
+
+    return { px, py, pz, z2 };
+  }
+
+  /**
+   * Renders the 3D Bifurcation Cascade with clean generative aesthetic.
+   */
+  render(ctx, camera, paletteId = 'bioluminescence', width, height) {
+    const points = this.computePoints(750);
+
+    ctx.save();
     ctx.fillStyle = '#05050a';
     ctx.fillRect(0, 0, width, height);
 
-    const numCols = Math.min(width, 1000);
-    const colWidth = width / numCols;
-    const rStep = (this.rMax - this.rMin) / numCols;
-    const xSpan = this.xMax - this.xMin || 1;
-
-    ctx.fillStyle = color;
-
-    for (let col = 0; col < numCols; col++) {
-      const r = this.rMin + col * rStep;
-      let x = 0.5;
-
-      // Settle
-      for (let i = 0; i < this.settleIterations; i++) {
-        x = r * x * (1.0 - x);
-      }
-
-      // Sample attractor
-      for (let i = 0; i < this.sampleIterations; i++) {
-        x = r * x * (1.0 - x);
-        if (x >= this.xMin && x <= this.xMax) {
-          const px = col * colWidth;
-          const py = height - ((x - this.xMin) / xSpan) * height;
-          ctx.fillRect(px, py, 1.2, 1.2);
-        }
-      }
+    // Precompute color LUT from active palette
+    const lut = new Array(256);
+    for (let i = 0; i < 256; i++) {
+      lut[i] = samplePalette(paletteId, i / 255, 0.45);
     }
 
-    this.drawAnnotations(ctx, width, height);
-  }
+    // Render all 3D points cleanly without arbitrary axis lines or text
+    for (let i = 0; i < points.length; i++) {
+      const pt = points[i];
+      const proj = this.project(pt, camera, width, height);
+      if (!proj) continue;
 
-  /**
-   * Overlays mathematical landmarks and navigation guide.
-   */
-  drawAnnotations(ctx, width, height) {
-    ctx.font = '12px "JetBrains Mono", monospace';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+      // Color based on x-state & r-parameter
+      const colorT = Math.max(0, Math.min(1, (pt[3] - 2.4) / 1.6 * 0.5 + pt[4] * 0.5));
+      const colorIdx = Math.floor(colorT * 255);
 
-    // Bounds indicators
-    ctx.fillText(`r Min: ${this.rMin.toFixed(5)}`, 16, height - 16);
-    ctx.fillText(`r Max: ${this.rMax.toFixed(5)}`, width - 160, height - 16);
-    ctx.fillText(`x Max: ${this.xMax.toFixed(2)}`, 16, 24);
-    ctx.fillText(`x Min: ${this.xMin.toFixed(2)}`, 16, height - 36);
-
-    // Feigenbaum point marker
-    const rChaos = 3.569946;
-    if (rChaos >= this.rMin && rChaos <= this.rMax) {
-      const px = ((rChaos - this.rMin) / (this.rMax - this.rMin)) * width;
-      ctx.strokeStyle = 'rgba(255, 0, 127, 0.6)';
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(px, 0);
-      ctx.lineTo(px, height);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      ctx.fillStyle = '#ff007f';
-      ctx.fillText('Feigenbaum Chaos Threshold r ≈ 3.5699', Math.min(px + 8, width - 260), 32);
+      ctx.fillStyle = lut[colorIdx];
+      ctx.fillRect(proj.px, proj.py, 1.4, 1.4);
     }
 
-    // Interaction hint
-    ctx.fillStyle = 'rgba(0, 242, 254, 0.75)';
-    ctx.fillText('Click & Drag to Pan | Scroll Wheel to Zoom into Fractal Windows', width / 2 - 200, height - 16);
+    ctx.restore();
   }
 }

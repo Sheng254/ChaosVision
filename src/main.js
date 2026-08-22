@@ -1,5 +1,5 @@
 /**
- * ChaosVision: Master Application Orchestrator
+ * ChaosVision: Application Orchestrator
  */
 
 import { ATTRACTORS_3D, ATTRACTORS_2D } from './math/attractors.js';
@@ -12,7 +12,7 @@ import { Canvas2DRenderer } from './renderer/canvas2d.js';
 import { Trajectory3DRenderer } from './renderer/webgl3d.js';
 import { ChaoticSonifier } from './audio/sonifier.js';
 import { HUDController } from './ui/hud.js';
-import { StudioExporter, FlexibleVideoRecorder } from './ui/exporter.js';
+import { StudioExporter } from './ui/exporter.js';
 import { URLStateManager } from './ui/urlState.js';
 
 class ChaosVisionApp {
@@ -25,7 +25,6 @@ class ChaosVisionApp {
     this.swarm = new TrajectorySwarm(3, 500);
     this.pendulum = new DoublePendulumSystem(10, 450);
     this.bifurcation = new BifurcationExplorer();
-    this.videoRecorder = new FlexibleVideoRecorder(this.canvas);
 
     // App state
     this.systemType = '3d_attractor';
@@ -35,8 +34,15 @@ class ChaosVisionApp {
     this.speed = 1.0;
     this.trailDecay = 0.06;
     this.swarmCount = 3;
-    this.customFormula = 'sin(a * y) - cos(b * x)';
-    this.customCompiledFn = null;
+
+    // Dynamic Multi-Equation Sandbox state
+    this.customTemplateId = 'peter_dejong';
+    this.customEquations = [
+      { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - \\cos(b \\cdot x)' },
+      { id: 'eq_y', target: 'y', latex: '\\sin(c \\cdot x) - \\cos(d \\cdot y)' }
+    ];
+    this.customCompiledSystem = null;
+    this.lastFocusedMathField = null;
 
     // Performance metrics
     this.lastTime = performance.now();
@@ -54,7 +60,6 @@ class ChaosVisionApp {
     this.hud = new HUDController(this);
     this.initExporters();
     this.initCustomFormulaUI();
-    this.initBifurcationInteractivity();
 
     // Load from URL state or default to Lorenz
     const savedState = URLStateManager.loadState();
@@ -79,89 +84,8 @@ class ChaosVisionApp {
     this.canvas.style.height = `${height}px`;
 
     const ctx = this.canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform before scaling
     ctx.scale(dpr, dpr);
-    this.renderer2D.canvas.width = width;
-    this.renderer2D.canvas.height = height;
-    this.renderer3D.canvas.width = width;
-    this.renderer3D.canvas.height = height;
-  }
-
-  initBifurcationInteractivity() {
-    let isBifDragging = false;
-    let startX = 0;
-    let initialTouchDist = 0;
-
-    // Mouse Panning & Zooming
-    this.canvas.addEventListener('mousedown', (e) => {
-      if (this.systemType === 'bifurcation') {
-        isBifDragging = true;
-        startX = e.clientX;
-      }
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (this.systemType === 'bifurcation' && isBifDragging) {
-        const dx = e.clientX - startX;
-        const deltaPercent = dx / window.innerWidth;
-        this.bifurcation.pan(deltaPercent);
-        startX = e.clientX;
-      }
-    });
-
-    window.addEventListener('mouseup', () => {
-      isBifDragging = false;
-    });
-
-    this.canvas.addEventListener('wheel', (e) => {
-      if (this.systemType === 'bifurcation') {
-        e.preventDefault();
-        const factor = e.deltaY < 0 ? 0.85 : 1.18;
-        const centerPercent = e.clientX / window.innerWidth;
-        this.bifurcation.zoom(factor, centerPercent);
-      }
-    }, { passive: false });
-
-    // Touch Screen Panning & Pinch-Zooming (Mobile / iPads)
-    this.canvas.addEventListener('touchstart', (e) => {
-      if (this.systemType === 'bifurcation') {
-        if (e.touches.length === 1) {
-          isBifDragging = true;
-          startX = e.touches[0].clientX;
-        } else if (e.touches.length === 2) {
-          isBifDragging = false;
-          initialTouchDist = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-          );
-        }
-      }
-    }, { passive: true });
-
-    this.canvas.addEventListener('touchmove', (e) => {
-      if (this.systemType === 'bifurcation') {
-        if (e.touches.length === 1 && isBifDragging) {
-          const dx = e.touches[0].clientX - startX;
-          const deltaPercent = dx / window.innerWidth;
-          this.bifurcation.pan(deltaPercent);
-          startX = e.touches[0].clientX;
-        } else if (e.touches.length === 2 && initialTouchDist > 0) {
-          const dist = Math.hypot(
-            e.touches[0].clientX - e.touches[1].clientX,
-            e.touches[0].clientY - e.touches[1].clientY
-          );
-          const ratio = initialTouchDist / dist;
-          const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-          const centerPercent = midX / window.innerWidth;
-          this.bifurcation.zoom(ratio > 1 ? 1.04 : 0.96, centerPercent);
-          initialTouchDist = dist;
-        }
-      }
-    }, { passive: true });
-
-    this.canvas.addEventListener('touchend', () => {
-      isBifDragging = false;
-      initialTouchDist = 0;
-    });
   }
 
   switchSystem(type, id) {
@@ -175,7 +99,13 @@ class ChaosVisionApp {
       customFormulaSection.style.display = (type === 'custom') ? 'block' : 'none';
     }
 
+    const swarmGroup = document.getElementById('swarm-count-input')?.closest('.control-group');
+    if (swarmGroup) {
+      swarmGroup.style.display = (type === '3d_attractor' || type === 'pendulum') ? 'flex' : 'none';
+    }
+
     if (type === '3d_attractor') {
+      this.camera.autoRotate = true;
       const def = ATTRACTORS_3D[id] || ATTRACTORS_3D.lorenz;
       this.params = { ...def.defaultParams };
       this.swarm.init(def.initialState, this.swarmCount);
@@ -201,19 +131,28 @@ class ChaosVisionApp {
       });
     } else if (type === 'bifurcation') {
       this.bifurcation.reset();
+      this.camera.autoRotate = false;
+      this.camera.rotX = this.camera.targetRotX = 0.0;
+      this.camera.rotY = this.camera.targetRotY = 0.0;
+      this.camera.zoom = this.camera.targetZoom = 1.0;
+      this.camera.panX = this.camera.targetPanX = 0.0;
+      this.camera.panY = this.camera.targetPanY = 0.0;
       this.hud.updateDynamicParams({
-        settle: { min: 50, max: 800, step: 50, label: 'Settle Steps' },
-        samples: { min: 100, max: 600, step: 20, label: 'Sample Points' }
-      }, { settle: 300, samples: 250 }, (k, v) => {
+        settle: { min: 50, max: 600, step: 25, label: 'Settle Steps' },
+        samples: { min: 50, max: 400, step: 10, label: 'Sample Points' }
+      }, { settle: this.bifurcation.settleIterations, samples: this.bifurcation.sampleIterations }, (k, v) => {
         if (k === 'settle') this.bifurcation.settleIterations = v;
         if (k === 'samples') this.bifurcation.sampleIterations = v;
+        this.bifurcation.reset();
       });
     } else if (type === 'custom') {
       this.compileCustomFormula();
     }
 
     const selectEl = document.getElementById('system-select');
-    if (selectEl) selectEl.value = `${type}:${id}`;
+    if (selectEl) {
+      selectEl.value = (type === 'custom') ? 'custom:sandbox' : `${type}:${id}`;
+    }
   }
 
   setPalette(paletteId) {
@@ -246,44 +185,130 @@ class ChaosVisionApp {
   }
 
   resetCamera() {
-    this.camera.reset();
-    if (this.systemType === 'bifurcation') {
-      this.bifurcation.reset();
-    }
-    if (this.systemType === '2d_map' || this.systemType === 'custom') {
-      this.renderer2D.clear();
-    }
+    const isFlatMode = (this.systemType === '2d_map' || this.systemType === 'custom' || this.systemType === 'bifurcation');
+    this.camera.targetRotX = isFlatMode ? 0.0 : 0.35;
+    this.camera.targetRotY = isFlatMode ? 0.0 : -0.6;
+    this.camera.targetPanX = 0;
+    this.camera.targetPanY = 0;
+    this.camera.targetZoom = 1.0;
+    this.camera.velRotX = 0;
+    this.camera.velRotY = 0;
+    this.camera.velPanX = 0;
+    this.camera.velPanY = 0;
+    this.camera.velZoom = 0;
   }
 
-  loadPreset(preset) {
-    this.paletteId = preset.palette || 'bioluminescence';
-    document.getElementById('palette-select').value = this.paletteId;
+  applyPreset(preset) {
+    if (!preset) return;
+
+    if (preset.palette) {
+      this.setPalette(preset.palette);
+      const palEl = document.getElementById('palette-select');
+      if (palEl) palEl.value = preset.palette;
+    }
+
+    if (preset.speed !== undefined) {
+      this.speed = preset.speed;
+      const spdEl = document.getElementById('speed-input');
+      if (spdEl) spdEl.value = preset.speed;
+      const spdVal = document.getElementById('speed-val');
+      if (spdVal) spdVal.textContent = `${preset.speed.toFixed(1)}x`;
+    }
+
+    if (preset.trailDecay !== undefined) {
+      this.trailDecay = preset.trailDecay;
+      const decEl = document.getElementById('decay-input');
+      if (decEl) decEl.value = preset.trailDecay;
+      const decVal = document.getElementById('decay-val');
+      if (decVal) decVal.textContent = preset.trailDecay.toFixed(2);
+    }
+
+    const swarm = preset.swarmCount || preset.divergenceTrails;
+    if (swarm !== undefined) {
+      this.swarmCount = swarm;
+      const swmEl = document.getElementById('swarm-count-input');
+      if (swmEl) swmEl.value = swarm;
+      const swmVal = document.getElementById('swarm-count-val');
+      if (swmVal) swmVal.textContent = swarm;
+    }
+
+    if (preset.camera) {
+      if (preset.camera.rotX !== undefined) this.camera.rotX = this.camera.targetRotX = preset.camera.rotX;
+      if (preset.camera.rotY !== undefined) this.camera.rotY = this.camera.targetRotY = preset.camera.rotY;
+      if (preset.camera.panX !== undefined) this.camera.panX = this.camera.targetPanX = preset.camera.panX;
+      if (preset.camera.panY !== undefined) this.camera.panY = this.camera.targetPanY = preset.camera.panY;
+      if (preset.camera.zoom !== undefined) this.camera.zoom = this.camera.targetZoom = preset.camera.zoom;
+    }
+
+    if (preset.params) {
+      this.params = { ...preset.params };
+    }
 
     if (preset.systemType === '3d_attractor') {
       this.switchSystem('3d_attractor', preset.systemId);
-      if (preset.params) this.params = { ...preset.params };
-      if (preset.camera) {
-        this.camera.targetRotX = preset.camera.rotX;
-        this.camera.targetRotY = preset.camera.rotY;
-        this.camera.targetZoom = preset.camera.zoom;
-      }
-      if (preset.divergenceTrails) {
-        this.setSwarmCount(preset.divergenceTrails);
+      const def = ATTRACTORS_3D[preset.systemId];
+      if (def) {
+        this.hud.updateDynamicParams(def.paramRanges, this.params, (k, v) => {
+          this.params[k] = v;
+        });
       }
     } else if (preset.systemType === '2d_map') {
       this.switchSystem('2d_map', preset.systemId);
-      if (preset.params) this.params = { ...preset.params };
+      const def = ATTRACTORS_2D[preset.systemId];
+      if (def) {
+        this.hud.updateDynamicParams(def.paramRanges, this.params, (k, v) => {
+          this.params[k] = v;
+          this.renderer2D.clear();
+        });
+      }
     } else if (preset.systemType === 'pendulum') {
       this.switchSystem('pendulum', 'double_pendulum');
-      if (preset.pendulumCount) {
-        this.setSwarmCount(preset.pendulumCount);
-      }
+      this.hud.updateDynamicParams({
+        gravity: { min: 1.0, max: 25.0, step: 0.1, label: 'Gravity (g)' },
+        damping: { min: 0.0, max: 0.005, step: 0.0001, label: 'Friction' }
+      }, this.params, (k, v) => {
+        if (k === 'gravity') this.pendulum.g = v;
+        if (k === 'damping') this.pendulum.damping = v;
+      });
     } else if (preset.systemType === 'bifurcation') {
       this.switchSystem('bifurcation', 'logistic');
     }
   }
 
+  loadPreset(preset) {
+    this.applyPreset(preset);
+  }
+
   getState() {
+    // Filter parameters to ONLY the active system's legitimate parameters
+    const activeParams = {};
+    if (this.systemType === '3d_attractor') {
+      const def = ATTRACTORS_3D[this.systemId];
+      if (def && def.defaultParams) {
+        for (const k of Object.keys(def.defaultParams)) {
+          if (this.params[k] !== undefined) activeParams[k] = this.params[k];
+        }
+      }
+    } else if (this.systemType === '2d_map') {
+      const def = ATTRACTORS_2D[this.systemId];
+      if (def && def.defaultParams) {
+        for (const k of Object.keys(def.defaultParams)) {
+          if (this.params[k] !== undefined) activeParams[k] = this.params[k];
+        }
+      }
+    } else if (this.systemType === 'pendulum') {
+      activeParams.gravity = this.pendulum.g;
+      activeParams.damping = this.pendulum.damping;
+    } else if (this.systemType === 'bifurcation') {
+      activeParams.settle = this.bifurcation.settleIterations;
+      activeParams.samples = this.bifurcation.sampleIterations;
+    } else if (this.systemType === 'custom') {
+      const freeVars = (this.customCompiledSystem && this.customCompiledSystem.freeVars) || ['a', 'b', 'c', 'd'];
+      for (const v of freeVars) {
+        if (this.params[v] !== undefined) activeParams[v] = this.params[v];
+      }
+    }
+
     return {
       systemType: this.systemType,
       systemId: this.systemId,
@@ -298,8 +323,9 @@ class ChaosVisionApp {
         panY: this.camera.panY,
         zoom: this.camera.zoom
       },
-      params: this.params,
-      customFormula: this.customFormula
+      params: activeParams,
+      customEquations: this.systemType === 'custom' ? this.customEquations : undefined,
+      customTemplateId: this.systemType === 'custom' ? (this.customTemplateId || 'peter_dejong') : undefined
     };
   }
 
@@ -309,21 +335,21 @@ class ChaosVisionApp {
       const palEl = document.getElementById('palette-select');
       if (palEl) palEl.value = s.paletteId;
     }
-    if (s.speed) {
+    if (s.speed !== undefined && s.speed !== null) {
       this.speed = s.speed;
       const spdEl = document.getElementById('speed-input');
       if (spdEl) spdEl.value = s.speed;
       const spdVal = document.getElementById('speed-val');
       if (spdVal) spdVal.textContent = `${s.speed.toFixed(1)}x`;
     }
-    if (s.trailDecay) {
+    if (s.trailDecay !== undefined && s.trailDecay !== null) {
       this.trailDecay = s.trailDecay;
       const decEl = document.getElementById('decay-input');
       if (decEl) decEl.value = s.trailDecay;
       const decVal = document.getElementById('decay-val');
       if (decVal) decVal.textContent = s.trailDecay.toFixed(2);
     }
-    if (s.swarmCount) {
+    if (s.swarmCount !== undefined && s.swarmCount !== null) {
       this.swarmCount = s.swarmCount;
       const swmEl = document.getElementById('swarm-count-input');
       if (swmEl) swmEl.value = s.swarmCount;
@@ -337,67 +363,325 @@ class ChaosVisionApp {
       if (s.camera.panY !== undefined) this.camera.panY = this.camera.targetPanY = s.camera.panY;
       if (s.camera.zoom !== undefined) this.camera.zoom = this.camera.targetZoom = s.camera.zoom;
     }
-    if (s.customFormula) {
-      this.customFormula = s.customFormula;
-      const cfInput = document.getElementById('custom-formula-input');
-      if (cfInput) cfInput.value = s.customFormula;
+
+    if (s.systemType === 'custom') {
+      if (s.customEquations && Array.isArray(s.customEquations)) {
+        this.customEquations = s.customEquations;
+      }
+      if (s.customTemplateId) {
+        this.customTemplateId = s.customTemplateId;
+      }
+      this.renderEquationRows();
     }
 
+    // Switch system first to initialize clean default parameter schemas
     this.switchSystem(s.systemType, s.systemId);
 
+    // Overwrite only the relevant parameters that were shared in the link
     if (s.params) {
-      Object.assign(this.params, s.params);
       if (this.systemType === '3d_attractor') {
         const def = ATTRACTORS_3D[this.systemId];
-        if (def) {
+        if (def && def.defaultParams) {
+          for (const k of Object.keys(def.defaultParams)) {
+            if (s.params[k] !== undefined) {
+              this.params[k] = s.params[k];
+            }
+          }
           this.hud.updateDynamicParams(def.paramRanges, this.params, (k, v) => {
             this.params[k] = v;
           });
         }
       } else if (this.systemType === '2d_map') {
         const def = ATTRACTORS_2D[this.systemId];
-        if (def) {
+        if (def && def.defaultParams) {
+          for (const k of Object.keys(def.defaultParams)) {
+            if (s.params[k] !== undefined) {
+              this.params[k] = s.params[k];
+            }
+          }
           this.hud.updateDynamicParams(def.paramRanges, this.params, (k, v) => {
             this.params[k] = v;
             this.renderer2D.clear();
           });
         }
+      } else if (this.systemType === 'pendulum') {
+        if (s.params.gravity !== undefined) this.pendulum.g = s.params.gravity;
+        if (s.params.damping !== undefined) this.pendulum.damping = s.params.damping;
+        this.hud.updateDynamicParams({
+          gravity: { min: 1.0, max: 25.0, step: 0.1, label: 'Gravity (g)' },
+          damping: { min: 0.0, max: 0.005, step: 0.0001, label: 'Friction' }
+        }, { gravity: this.pendulum.g, damping: this.pendulum.damping }, (k, v) => {
+          if (k === 'gravity') this.pendulum.g = v;
+          if (k === 'damping') this.pendulum.damping = v;
+        });
+      } else if (this.systemType === 'bifurcation') {
+        if (s.params.settle !== undefined) this.bifurcation.settleIterations = s.params.settle;
+        if (s.params.samples !== undefined) this.bifurcation.sampleIterations = s.params.samples;
+        this.bifurcation.reset();
+        this.hud.updateDynamicParams({
+          settle: { min: 50, max: 600, step: 25, label: 'Settle Steps' },
+          samples: { min: 50, max: 400, step: 10, label: 'Sample Points' }
+        }, { settle: this.bifurcation.settleIterations, samples: this.bifurcation.sampleIterations }, (k, v) => {
+          if (k === 'settle') this.bifurcation.settleIterations = v;
+          if (k === 'samples') this.bifurcation.sampleIterations = v;
+          this.bifurcation.reset();
+        });
+      } else if (this.systemType === 'custom') {
+        this.params = { ...s.params };
+        this.compileCustomFormula();
       }
     }
   }
 
   initCustomFormulaUI() {
-    const input = document.getElementById('custom-formula-input');
-    const compileBtn = document.getElementById('btn-compile-formula');
-    const errorBox = document.getElementById('formula-error');
+    this.renderEquationRows();
 
-    if (compileBtn && input) {
-      compileBtn.addEventListener('click', () => {
-        this.customFormula = input.value;
+    // Add Equation Button
+    const addEqBtn = document.getElementById('btn-add-equation');
+    if (addEqBtn) {
+      addEqBtn.addEventListener('click', () => {
+        const hasZ = this.customEquations.some(e => e.target === 'z');
+        if (hasZ || this.customEquations.length >= 3) return;
+
+        this.customEquations.push({
+          id: 'eq_z',
+          target: 'z',
+          latex: '\\cos(x \\cdot y)'
+        });
+
+        this.renderEquationRows();
         this.compileCustomFormula();
       });
+    }
+
+    // Keypad Toggle
+    const keypadToggle = document.getElementById('btn-toggle-keypad');
+    const keypadContainer = document.getElementById('custom-math-keypad');
+    if (keypadToggle && keypadContainer) {
+      keypadToggle.addEventListener('click', () => {
+        keypadContainer.classList.toggle('collapsed');
+        keypadToggle.classList.toggle('active', !keypadContainer.classList.contains('collapsed'));
+      });
+    }
+
+    // Keypad Buttons
+    const keypadButtons = document.querySelectorAll('.keypad-btn');
+    keypadButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const latex = btn.getAttribute('data-latex');
+        if (this.lastFocusedMathField && latex) {
+          this.lastFocusedMathField.executeCommand(['insert', latex]);
+          this.lastFocusedMathField.focus();
+        }
+      });
+    });
+
+    // Preset Templates
+    const templateSelect = document.getElementById('custom-template-select');
+    const templates = {
+      peter_dejong: {
+        eqs: [
+          { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - \\cos(b \\cdot x)' },
+          { id: 'eq_y', target: 'y', latex: '\\sin(c \\cdot x) - \\cos(d \\cdot y)' }
+        ],
+        params: { a: 1.4, b: -2.3, c: 2.4, d: -2.1 }
+      },
+      clifford: {
+        eqs: [
+          { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) + c \\cdot \\cos(a \\cdot x)' },
+          { id: 'eq_y', target: 'y', latex: '\\sin(b \\cdot x) + d \\cdot \\cos(b \\cdot y)' }
+        ],
+        params: { a: -1.4, b: 1.6, c: 1.0, d: 0.7 }
+      },
+      hopalong: {
+        eqs: [
+          { id: 'eq_x', target: 'x', latex: 'y - \\operatorname{sign}(x) \\cdot \\sqrt{\\left| b \\cdot x - c \\right|}' },
+          { id: 'eq_y', target: 'y', latex: 'a - x' }
+        ],
+        params: { a: 2.0, b: 1.0, c: 0.0 }
+      },
+      ikeda: {
+        eqs: [
+          { id: 'eq_t', target: 't', latex: '0.4 - \\frac{6}{1 + x^2 + y^2}' },
+          { id: 'eq_x', target: 'x', latex: '1 + u \\cdot (x \\cdot \\cos(t) - y \\cdot \\sin(t))' },
+          { id: 'eq_y', target: 'y', latex: 'u \\cdot (x \\cdot \\sin(t) + y \\cdot \\cos(t))' }
+        ],
+        params: { u: 0.9 }
+      },
+      gumowski: {
+        eqs: [
+          { id: 'eq_x', target: 'x', latex: 'y + a \\cdot (1 - 0.05 \\cdot y^2) \\cdot y + \\frac{2 \\cdot x}{1 + x^2}' },
+          { id: 'eq_y', target: 'y', latex: '-x + \\frac{2 \\cdot y}{1 + y^2}' }
+        ],
+        params: { a: 0.008, b: 0.05 }
+      },
+      tinkerbell: {
+        eqs: [
+          { id: 'eq_x', target: 'x', latex: 'x^2 - y^2 + a \\cdot x + b \\cdot y' },
+          { id: 'eq_y', target: 'y', latex: '2 \\cdot x \\cdot y + c \\cdot x + d \\cdot y' }
+        ],
+        params: { a: 0.9, b: -0.6, c: 2.0, d: 0.5 }
+      },
+      sprott_3d: {
+        eqs: [
+          { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - z \\cdot \\cos(b \\cdot x)' },
+          { id: 'eq_y', target: 'y', latex: 'z \\cdot \\sin(c \\cdot x) - \\cos(d \\cdot y)' },
+          { id: 'eq_z', target: 'z', latex: '\\sin(x)' }
+        ],
+        params: { a: 2.24, b: -0.65, c: 0.43, d: -2.43 }
+      },
+      blank: {
+        eqs: [
+          { id: 'eq_x', target: 'x', latex: '' },
+          { id: 'eq_y', target: 'y', latex: '' }
+        ],
+        params: { a: 1.0, b: 1.0 }
+      }
+    };
+
+    if (templateSelect) {
+      templateSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        this.customTemplateId = val;
+        const t = templates[val];
+        if (t) {
+          this.customEquations = JSON.parse(JSON.stringify(t.eqs));
+          this.params = { ...t.params };
+          this.renderEquationRows();
+          this.compileCustomFormula();
+        }
+      });
+    }
+  }
+
+  renderEquationRows() {
+    const listContainer = document.getElementById('math-equations-list');
+    if (!listContainer) return;
+
+    this.isRenderingRows = true;
+    listContainer.innerHTML = '';
+
+    this.customEquations.forEach((eq, index) => {
+      const row = document.createElement('div');
+      row.className = 'math-row';
+
+      const label = document.createElement('div');
+      label.className = 'math-eq-label';
+      label.innerHTML = `${eq.target}<sub>n+1</sub> =`;
+
+      const mf = document.createElement('math-field');
+      mf.className = 'custom-math-field';
+      mf.setAttribute('virtual-keyboard-mode', 'manual');
+
+      mf.addEventListener('focus', () => {
+        this.lastFocusedMathField = mf;
+      });
+
+      mf.addEventListener('input', () => {
+        if (this.isRenderingRows || this.systemType !== 'custom') return;
+
+        // Check if user is actively interacting with this math-field
+        const isUserFocused = (document.activeElement === mf || mf.matches(':focus-within') || (typeof mf.hasFocus === 'function' && mf.hasFocus()));
+        
+        // If it's a background event and value didn't change, ignore
+        if (!isUserFocused && mf.value === eq.latex) return;
+
+        const valueChanged = (mf.value !== eq.latex);
+        eq.latex = mf.value;
+
+        // Update formula compilation
+        this.compileCustomFormula();
+      });
+
+      row.appendChild(label);
+      row.appendChild(mf);
+
+      // Only allow deleting optional equations (e.g. z or helper variables), never core x and y
+      const isCoreEquation = (eq.target === 'x' || eq.target === 'y') && (index < 2);
+      if (!isCoreEquation) {
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn-remove-eq';
+        delBtn.title = `Remove ${eq.target} equation`;
+        delBtn.setAttribute('aria-label', `Remove equation ${eq.target}`);
+        delBtn.innerHTML = '<i class="fas fa-times"></i>';
+
+        delBtn.addEventListener('click', () => {
+          this.customEquations.splice(index, 1);
+          this.renderEquationRows();
+          if (this.systemType === 'custom') {
+            this.compileCustomFormula();
+          }
+        });
+
+        row.appendChild(delBtn);
+      }
+
+      listContainer.appendChild(row);
+
+      // Set MathLive LaTeX value securely
+      if (typeof mf.setValue === 'function') {
+        mf.setValue(eq.latex || '', { format: 'latex' });
+      } else {
+        mf.value = eq.latex || '';
+      }
+
+      if (index === 0 && !this.lastFocusedMathField) {
+        this.lastFocusedMathField = mf;
+      }
+    });
+
+    const templateSelect = document.getElementById('custom-template-select');
+    if (templateSelect && this.customTemplateId && this.customTemplateId !== 'custom') {
+      templateSelect.value = this.customTemplateId;
+    }
+
+    this.isRenderingRows = false;
+
+    // Update Add Equation Button (Max 3 equations: X, Y, Z)
+    const addEqBtn = document.getElementById('btn-add-equation');
+    if (addEqBtn) {
+      if (this.customEquations.length < 3) {
+        addEqBtn.style.display = 'flex';
+        addEqBtn.querySelector('.btn-label').textContent = 'Add Z Equation (3D Mode)';
+      } else {
+        addEqBtn.style.display = 'none';
+      }
     }
   }
 
   compileCustomFormula() {
     const errorBox = document.getElementById('formula-error');
     try {
-      this.customCompiledFn = MathParser.compile(this.customFormula);
+      this.customCompiledSystem = MathParser.compileSystem(this.customEquations);
+
       if (errorBox) {
-        errorBox.textContent = 'Formula compiled successfully!';
+        errorBox.textContent = `✓ ${this.customEquations.length} equations compiled successfully`;
         errorBox.style.color = '#39ff14';
       }
+
       this.renderer2D.clear();
-      this.params = { a: 1.4, b: -2.3, c: 2.4, d: -2.1 };
-      this.hud.updateDynamicParams({
-        a: { min: -3.0, max: 3.0, step: 0.05, label: 'a' },
-        b: { min: -3.0, max: 3.0, step: 0.05, label: 'b' },
-        c: { min: -3.0, max: 3.0, step: 0.05, label: 'c' },
-        d: { min: -3.0, max: 3.0, step: 0.05, label: 'd' }
-      }, this.params, (k, v) => {
-        this.params[k] = v;
-        this.renderer2D.clear();
-      });
+
+      // STRICT GUARD: Only overwrite HUD sliders if the application is actively in Custom Sandbox mode!
+      if (this.systemType === 'custom') {
+        const freeVars = this.customCompiledSystem.freeVars || [];
+        const activeVars = freeVars.length > 0 ? freeVars : ['a', 'b', 'c', 'd'];
+
+        const paramRanges = {};
+        const defaultParamVals = { a: 1.4, b: -2.3, c: 2.4, d: -2.1, k: 1.0, m: 1.0, u: 0.9 };
+
+        activeVars.forEach(v => {
+          paramRanges[v] = { min: -3.0, max: 3.0, step: 0.05, label: v };
+          if (this.params[v] === undefined) {
+            this.params[v] = defaultParamVals[v] !== undefined ? defaultParamVals[v] : 1.0;
+          }
+        });
+
+        this.hud.updateDynamicParams(paramRanges, this.params, (k, val) => {
+          this.params[k] = val;
+          this.renderer2D.clear();
+        });
+      }
     } catch (err) {
       if (errorBox) {
         errorBox.textContent = `Syntax Error: ${err.message}`;
@@ -411,15 +695,18 @@ class ChaosVisionApp {
     const export4kBtn = document.getElementById('btn-export-4k');
     if (export4kBtn) {
       export4kBtn.addEventListener('click', () => {
-        this.hud.showToast('Rendering 4K Ultra-HD Wallpaper...');
-        setTimeout(() => {
-          StudioExporter.export4KWallpaper((offCtx, w, h) => {
+        this.hud.showToast('Rendering 4K Wallpaper...');
+        StudioExporter.export4KWallpaper(
+          (offCtx, w, h) => {
             offCtx.fillStyle = '#05050a';
             offCtx.fillRect(0, 0, w, h);
             offCtx.drawImage(this.canvas, 0, 0, w, h);
-          }, `ChaosVision_${this.systemId}_4K.png`);
-          this.hud.showToast('4K Wallpaper Downloaded!');
-        }, 60);
+          },
+          `ChaosVision_${this.systemId}_4K.png`,
+          () => {
+            this.hud.showToast('4K Wallpaper Downloaded!');
+          }
+        );
       });
     }
 
@@ -427,46 +714,8 @@ class ChaosVisionApp {
     const exportSvgBtn = document.getElementById('btn-export-svg');
     if (exportSvgBtn) {
       exportSvgBtn.addEventListener('click', () => {
-        if (this.systemType === '3d_attractor') {
-          const trajectories = this.swarm.getTrajectories();
-          const paths = trajectories.map(t => t.trail.map(pt => {
-            const p = this.renderer3D.project(pt, this.camera, ATTRACTORS_3D[this.systemId].center, ATTRACTORS_3D[this.systemId].scale);
-            return p ? { x: p.px, y: p.py } : { x: 0, y: 0 };
-          }));
-          StudioExporter.exportSVG(paths, window.innerWidth, window.innerHeight);
-          this.hud.showToast('Vector SVG Exported!');
-        } else {
-          this.hud.showToast('SVG export is optimized for 3D trajectory lines.');
-        }
-      });
-    }
-
-    // Custom Duration Video Recorder
-    const recBtn = document.getElementById('btn-record-video');
-    if (recBtn) {
-      recBtn.addEventListener('click', () => {
-        if (this.videoRecorder.isRecording()) {
-          this.videoRecorder.stop();
-        } else {
-          const ok = this.videoRecorder.start(
-            (sec) => {
-              const mins = Math.floor(sec / 60).toString().padStart(2, '0');
-              const s = (sec % 60).toString().padStart(2, '0');
-              recBtn.querySelector('.btn-label').textContent = `Stop (${mins}:${s})`;
-            },
-            () => {
-              recBtn.classList.remove('recording');
-              recBtn.querySelector('.btn-label').textContent = 'Record Video';
-              this.hud.showToast('Video recording saved and downloaded!');
-            }
-          );
-
-          if (ok) {
-            recBtn.classList.add('recording');
-            recBtn.querySelector('.btn-label').textContent = 'Stop (00:00)';
-            this.hud.showToast('Recording started. Click "Stop" whenever you wish to finish.');
-          }
-        }
+        StudioExporter.exportSystemSVG(this, window.innerWidth, window.innerHeight);
+        this.hud.showToast('Vector SVG Exported!');
       });
     }
   }
@@ -502,7 +751,14 @@ class ChaosVisionApp {
       iterationMetric = `${trajectories.length * 500} pts`;
     } else if (this.systemType === '2d_map') {
       const def = ATTRACTORS_2D[this.systemId] || ATTRACTORS_2D.clifford;
-      this.renderer2D.fade(this.trailDecay);
+      const isInteracting = this.camera.isDragging || this.camera.isPanning ||
+        Math.abs(this.camera.velZoom) > 0.0005 ||
+        Math.abs(this.camera.velRotX) > 0.0005 ||
+        Math.abs(this.camera.velRotY) > 0.0005;
+
+      const dynamicFade = isInteracting ? Math.max(0.22, this.trailDecay * 3) : this.trailDecay;
+
+      this.renderer2D.fade(dynamicFade);
       this.renderer2D.render2DMapBatch(
         def.iterate,
         this.params,
@@ -520,33 +776,33 @@ class ChaosVisionApp {
     } else if (this.systemType === 'bifurcation') {
       this.bifurcation.render(
         this.canvas.getContext('2d'),
-        window.innerWidth,
-        window.innerHeight,
-        'rgba(0, 242, 254, 0.5)'
+        this.camera,
+        this.paletteId,
+        this.canvas.clientWidth,
+        this.canvas.clientHeight
       );
-      iterationMetric = 'Cascade';
-    } else if (this.systemType === 'custom' && this.customCompiledFn) {
-      const a = this.params.a || 1.4;
-      const b = this.params.b || -2.3;
-      const c = this.params.c || 2.4;
-      const d = this.params.d || -2.1;
+      iterationMetric = '3D Manifold';
+    } else if (this.systemType === 'custom' && this.customCompiledSystem) {
       const t = timestamp * 0.001;
-      const fn = this.customCompiledFn;
+      const fnSystem = this.customCompiledSystem;
+      const params = this.params;
+      const isInteracting = this.camera.isDragging || this.camera.isPanning ||
+        Math.abs(this.camera.velZoom) > 0.0005 ||
+        Math.abs(this.camera.velRotX) > 0.0005 ||
+        Math.abs(this.camera.velRotY) > 0.0005;
 
-      this.renderer2D.fade(this.trailDecay);
+      const dynamicFade = isInteracting ? Math.max(0.22, this.trailDecay * 3) : this.trailDecay;
+
+      this.renderer2D.fade(dynamicFade);
       this.renderer2D.render2DMapBatch(
-        (x, y) => {
-          const nextX = fn(x, y, 0, t, a, b, c, d, this.params);
-          const nextY = Math.sin(c * x) - Math.cos(d * y);
-          return [nextX, nextY];
-        },
-        this.params,
+        (x, y, z, p) => fnSystem(x, y, z, t, p || params),
+        params,
         Math.round(35000 * this.speed),
         this.paletteId,
         0.25,
         this.camera
       );
-      iterationMetric = 'Custom Sandbox';
+      iterationMetric = `${this.customEquations.length} Equations`;
     }
 
     // Performance metrics
@@ -562,7 +818,6 @@ class ChaosVisionApp {
   }
 }
 
-// Bootstrap application on window load
 window.addEventListener('DOMContentLoaded', () => {
   window.chaosApp = new ChaosVisionApp();
 });

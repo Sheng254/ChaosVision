@@ -1,12 +1,12 @@
 /**
- * Ultra-Smooth 60/120Hz Orbit & Pan Camera with Velocity Inertia and Gliding
- * Full Multi-Touch Pinch-to-Zoom, Two-Finger Pan, and Touch Momentum Physics.
+ * Precision 60/120Hz Orbit, Pan & Zoom Camera
+ * Kinetic momentum physics, velocity tracking, and multi-touch pinch controls.
  */
 
 export class OrbitCamera {
   constructor(canvas) {
     this.canvas = canvas;
-    
+
     // Core angles and positions
     this.rotX = 0.35;
     this.rotY = -0.6;
@@ -21,14 +21,15 @@ export class OrbitCamera {
     this.zoom = 1.0;
     this.targetZoom = 1.0;
 
-    // Velocity & Inertia Gliding
+    // Kinetic velocity & momentum
     this.velRotX = 0;
     this.velRotY = 0;
     this.velPanX = 0;
     this.velPanY = 0;
+    this.velZoom = 0;
 
     this.autoRotate = true;
-    this.autoRotateSpeed = 0.0025;
+    this.autoRotateSpeed = 0.002;
 
     this.isDragging = false;
     this.isPanning = false;
@@ -39,8 +40,6 @@ export class OrbitCamera {
     this.initialTouchDist = 0;
     this.lastMidX = 0;
     this.lastMidY = 0;
-
-    this.smoothing = 0.14; // Silky responsive damping
 
     this.initEvents();
   }
@@ -54,6 +53,7 @@ export class OrbitCamera {
       this.isPanning = (e.button === 2 || (e.button === 0 && e.shiftKey));
       this.lastMouseX = e.clientX;
       this.lastMouseY = e.clientY;
+
       this.velRotX = 0;
       this.velRotY = 0;
       this.velPanX = 0;
@@ -69,24 +69,26 @@ export class OrbitCamera {
 
       const dx = e.clientX - this.lastMouseX;
       const dy = e.clientY - this.lastMouseY;
+      this.lastMouseX = e.clientX;
+      this.lastMouseY = e.clientY;
 
       if (this.isDragging) {
-        const sens = 0.005;
+        const sens = 0.0045;
+        // Track rolling velocity for natural throw inertia
         this.velRotY = dx * sens;
         this.velRotX = dy * sens;
+
         this.targetRotY += this.velRotY;
         this.targetRotX += this.velRotX;
         this.targetRotX = Math.max(-Math.PI * 0.48, Math.min(Math.PI * 0.48, this.targetRotX));
       } else if (this.isPanning) {
-        const panSens = 1.2;
+        const panSens = 1.0;
         this.velPanX = dx * panSens;
         this.velPanY = dy * panSens;
+
         this.targetPanX += this.velPanX;
         this.targetPanY += this.velPanY;
       }
-
-      this.lastMouseX = e.clientX;
-      this.lastMouseY = e.clientY;
     });
 
     window.addEventListener('mouseup', () => {
@@ -96,15 +98,20 @@ export class OrbitCamera {
 
     el.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // Silky smooth exponential wheel zoom
+    // Kinetic Wheel / Trackpad Zoom
     el.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const zoomSpeed = 0.0018;
-      const factor = Math.exp(-e.deltaY * zoomSpeed);
-      this.targetZoom = Math.max(0.15, Math.min(8.0, this.targetZoom * factor));
+
+      // Normalize delta across line vs pixel vs page modes
+      const rawDelta = e.deltaMode === 1 ? e.deltaY * 16 : (e.deltaMode === 2 ? e.deltaY * 250 : e.deltaY);
+      const clampedDelta = Math.max(-80, Math.min(80, rawDelta));
+
+      // Smooth exponential zoom impulse
+      const zoomImpulse = -clampedDelta * 0.0016;
+      this.velZoom += zoomImpulse;
     }, { passive: false });
 
-    // Multi-Touch Controls (Mobile / Tablets / iPads)
+    // Touch Controls
     el.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         this.isDragging = true;
@@ -126,42 +133,42 @@ export class OrbitCamera {
     }, { passive: false });
 
     el.addEventListener('touchmove', (e) => {
-      e.preventDefault(); // Prevent page bounce on mobile
+      e.preventDefault();
       if (e.touches.length === 1 && this.isDragging) {
         const dx = e.touches[0].clientX - this.lastMouseX;
         const dy = e.touches[0].clientY - this.lastMouseY;
-        const sens = 0.006;
+        this.lastMouseX = e.touches[0].clientX;
+        this.lastMouseY = e.touches[0].clientY;
+
+        const sens = 0.005;
         this.velRotY = dx * sens;
         this.velRotX = dy * sens;
+
         this.targetRotY += this.velRotY;
         this.targetRotX += this.velRotX;
         this.targetRotX = Math.max(-Math.PI * 0.48, Math.min(Math.PI * 0.48, this.targetRotX));
-        this.lastMouseX = e.touches[0].clientX;
-        this.lastMouseY = e.touches[0].clientY;
       } else if (e.touches.length === 2) {
         const t1 = e.touches[0];
         const t2 = e.touches[1];
 
-        // 1. Two-finger Pinch-to-Zoom
+        // Two-finger Pinch Zoom
         const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
         if (this.initialTouchDist > 0) {
           const ratio = dist / this.initialTouchDist;
-          this.targetZoom = Math.max(0.15, Math.min(8.0, this.targetZoom * ratio));
+          this.targetZoom = Math.max(0.15, Math.min(10.0, this.targetZoom * ratio));
           this.initialTouchDist = dist;
         }
 
-        // 2. Two-finger Pan
+        // Two-finger Pan
         const midX = (t1.clientX + t2.clientX) / 2;
         const midY = (t1.clientY + t2.clientY) / 2;
         const panDx = midX - this.lastMidX;
         const panDy = midY - this.lastMidY;
-        this.velPanX = panDx * 1.5;
-        this.velPanY = panDy * 1.5;
-        this.targetPanX += this.velPanX;
-        this.targetPanY += this.velPanY;
-
         this.lastMidX = midX;
         this.lastMidY = midY;
+
+        this.targetPanX += panDx * 1.2;
+        this.targetPanY += panDy * 1.2;
       }
     }, { passive: false });
 
@@ -184,17 +191,17 @@ export class OrbitCamera {
   }
 
   update() {
-    // Auto-rotation when not manually dragging
+    // Auto-rotation when idle
     if (this.autoRotate && !this.isDragging) {
       this.targetRotY += this.autoRotateSpeed;
     }
 
-    // Inertial gliding on release
+    // Inertial glide on release
     if (!this.isDragging) {
       this.targetRotY += this.velRotY;
       this.targetRotX += this.velRotX;
-      this.velRotX *= 0.92;
-      this.velRotY *= 0.92;
+      this.velRotX *= 0.94;
+      this.velRotY *= 0.94;
     }
 
     if (!this.isPanning) {
@@ -204,12 +211,23 @@ export class OrbitCamera {
       this.velPanY *= 0.90;
     }
 
-    // Exponential smoothing LERP
-    this.rotX += (this.targetRotX - this.rotX) * this.smoothing;
-    this.rotY += (this.targetRotY - this.rotY) * this.smoothing;
-    this.panX += (this.targetPanX - this.panX) * this.smoothing;
-    this.panY += (this.targetPanY - this.panY) * this.smoothing;
-    this.zoom += (this.targetZoom - this.zoom) * this.smoothing;
+    // Apply zoom momentum
+    if (Math.abs(this.velZoom) > 0.0001) {
+      this.targetZoom = Math.max(0.15, Math.min(10.0, this.targetZoom * (1 + this.velZoom)));
+      this.velZoom *= 0.82;
+    }
+
+    // Responsive LERP smoothing:
+    // Snappy responsiveness during active dragging (0.38), smooth gliding on release (0.22)
+    const rotSmoothing = this.isDragging ? 0.38 : 0.22;
+    const zoomSmoothing = 0.28;
+    const panSmoothing = this.isPanning ? 0.38 : 0.22;
+
+    this.rotX += (this.targetRotX - this.rotX) * rotSmoothing;
+    this.rotY += (this.targetRotY - this.rotY) * rotSmoothing;
+    this.panX += (this.targetPanX - this.panX) * panSmoothing;
+    this.panY += (this.targetPanY - this.panY) * panSmoothing;
+    this.zoom += (this.targetZoom - this.zoom) * zoomSmoothing;
   }
 
   reset() {
@@ -222,5 +240,6 @@ export class OrbitCamera {
     this.velRotY = 0;
     this.velPanX = 0;
     this.velPanY = 0;
+    this.velZoom = 0;
   }
 }

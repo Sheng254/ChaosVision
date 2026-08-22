@@ -1,6 +1,6 @@
 /**
  * High-Fidelity URL Hash State Synchronizer & Link Sharing Engine
- * Captures the exact parameters, speed, camera angle, and color palette.
+ * Captures the exact parameters, speed, camera angle, color palette, and custom equations.
  */
 
 export class URLStateManager {
@@ -12,32 +12,41 @@ export class URLStateManager {
     params.set('sys', state.systemType);
     params.set('id', state.systemId);
     params.set('pal', state.paletteId);
-    params.set('spd', (state.speed || 1.0).toFixed(2));
-    params.set('dec', (state.trailDecay || 0.08).toFixed(3));
-    params.set('swm', state.swarmCount || 3);
+    params.set('spd', parseFloat((state.speed || 1.0).toFixed(2)).toString());
+    params.set('dec', parseFloat((state.trailDecay || 0.06).toFixed(3)).toString());
+
+    if (state.systemType === '3d_attractor' || state.systemType === 'pendulum') {
+      params.set('swm', state.swarmCount || 3);
+    }
 
     // Save camera transform
     if (state.camera) {
-      params.set('rx', state.camera.rotX.toFixed(3));
-      params.set('ry', state.camera.rotY.toFixed(3));
-      params.set('px', state.camera.panX.toFixed(1));
-      params.set('py', state.camera.panY.toFixed(1));
-      params.set('zm', state.camera.zoom.toFixed(3));
+      params.set('rx', parseFloat(state.camera.rotX.toFixed(3)).toString());
+      params.set('ry', parseFloat(state.camera.rotY.toFixed(3)).toString());
+      if (Math.abs(state.camera.panX) > 0.1) params.set('px', parseFloat(state.camera.panX.toFixed(1)).toString());
+      if (Math.abs(state.camera.panY) > 0.1) params.set('py', parseFloat(state.camera.panY.toFixed(1)).toString());
+      params.set('zm', parseFloat(state.camera.zoom.toFixed(3)).toString());
     }
 
     // Save exact math parameters
     if (state.params) {
       for (const [k, v] of Object.entries(state.params)) {
-        params.set(`p_${k}`, typeof v === 'number' ? v.toFixed(5) : v);
+        const numVal = typeof v === 'number' ? parseFloat(v.toFixed(4)).toString() : v;
+        params.set(`p_${k}`, numVal);
       }
     }
 
-    if (state.customFormula) {
-      params.set('formula', encodeURIComponent(state.customFormula));
+    // Only serialize custom equations and templates when in Custom Sandbox mode
+    if (state.systemType === 'custom') {
+      if (state.customEquations && Array.isArray(state.customEquations) && state.customEquations.length > 0) {
+        params.set('eqs', JSON.stringify(state.customEquations));
+      }
+      if (state.customTemplateId) {
+        params.set('tpl', state.customTemplateId);
+      }
     }
 
     const fullUrl = `${window.location.origin}${window.location.pathname}#${params.toString()}`;
-    window.history.replaceState(null, '', fullUrl);
     return fullUrl;
   }
 
@@ -56,7 +65,25 @@ export class URLStateManager {
       const speed = params.get('spd') ? parseFloat(params.get('spd')) : null;
       const decay = params.get('dec') ? parseFloat(params.get('dec')) : null;
       const swarm = params.get('swm') ? parseInt(params.get('swm'), 10) : null;
-      const formula = params.get('formula');
+      
+      // Multi-equation custom systems (only when in custom mode or when eqs present)
+      let customEquations = null;
+      if (params.has('eqs')) {
+        try {
+          customEquations = JSON.parse(params.get('eqs'));
+        } catch (e) {
+          console.warn('Failed to parse customEquations from URL', e);
+        }
+      } else if (params.has('formula')) {
+        // Fallback for legacy single-formula links
+        const formula = params.get('formula');
+        customEquations = [
+          { id: 'eq_x', target: 'x', latex: formula },
+          { id: 'eq_y', target: 'y', latex: formula }
+        ];
+      }
+
+      const templateId = params.get('tpl');
 
       // Camera
       const camera = {};
@@ -77,13 +104,14 @@ export class URLStateManager {
       return {
         systemType: system,
         systemId: id,
+        customTemplateId: templateId,
         paletteId: palette,
         speed,
         trailDecay: decay,
         swarmCount: swarm,
         camera: Object.keys(camera).length > 0 ? camera : null,
         params: Object.keys(customParams).length > 0 ? customParams : null,
-        customFormula: formula ? decodeURIComponent(formula) : null
+        customEquations
       };
     } catch (e) {
       console.warn('Failed to parse URL state hash', e);

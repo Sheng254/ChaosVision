@@ -24,14 +24,14 @@
     <meta property="og:title" content="ChaosVision" />
     <meta property="og:description" content="Explore deterministic chaos, 3D strange attractors, double pendulum swarms, and generative ambient soundscapes in real-time." />
     <meta property="og:site_name" content="ChaosVision" />
-    <meta property="og:image" content="https://sheng254.github.io/ChaosVision/preview.png" />
+    <meta property="og:image" content="https://sheng254.github.io/ChaosVision/assets/preview_banner.png" />
 
     <!-- Twitter / X Card Previews -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://sheng254.github.io/ChaosVision/" />
     <meta name="twitter:title" content="ChaosVision" />
     <meta name="twitter:description" content="Explore deterministic chaos, 3D strange attractors, double pendulum swarms, and generative ambient soundscapes in real-time." />
-    <meta name="twitter:image" content="https://sheng254.github.io/ChaosVision/preview.png" />
+    <meta name="twitter:image" content="https://sheng254.github.io/ChaosVision/assets/preview_banner.png" />
     <meta name="twitter:creator" content="@Sheng254" />
 
     <!-- Schema.org JSON-LD Structured Data for Search Engines -->
@@ -61,6 +61,9 @@
     <!-- Vector Icons and Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="styles.css" />
+
+    <!-- MathLive for Interactive Visual Math Input -->
+    <script defer src="https://unpkg.com/mathlive"></script>
   </head>
   <body>
     <!-- Fullscreen Interactive Canvas -->
@@ -108,17 +111,12 @@
           <i class="fas fa-gem"></i>
           <span class="btn-label">4K Wallpaper</span>
         </button>
-
-        <button id="btn-record-video" class="btn-glass" data-tooltip="Record 60FPS video for as long as you wish">
-          <i class="fas fa-video"></i>
-          <span class="btn-label">Record Video</span>
-        </button>
       </div>
     </nav>
 
     <!-- Floating Glass HUD Control Deck -->
     <aside id="hud-container" class="hud-panel">
-      <button id="btn-toggle-hud" class="btn-toggle-hud" data-tooltip="Collapse or expand control drawer">
+      <button id="btn-toggle-hud" class="btn-toggle-hud" data-tooltip="Collapse or expand control drawer" aria-label="Toggle Control Drawer">
         <i class="fas fa-chevron-left"></i>
       </button>
 
@@ -140,28 +138,82 @@
               <option value="3d_attractor:halvorsen">Halvorsen Attractor (Tri-Symmetric)</option>
             </optgroup>
             <optgroup label="2D Discrete Strange Maps">
-              <option value="2d_map:clifford">Clifford Attractor (Smoke Ribbons)</option>
-              <option value="2d_map:dejong">Peter de Jong (Harmonic Silk)</option>
-              <option value="2d_map:tinkerbell">Tinkerbell Map (Quadratic Chaos)</option>
-              <option value="2d_map:ikeda">Ikeda Map (Laser Cavity Resonator)</option>
-              <option value="2d_map:gumowski">Gumowski-Mira (CERN Accelerator)</option>
+              <option value="2d_map:dejong">Peter de Jong (Harmonic Orbit)</option>
+              <option value="2d_map:clifford">Clifford Map (Toroidal Lattice)</option>
+              <option value="2d_map:hopalong">Hopalong Attractor (Fractal Web)</option>
+              <option value="2d_map:ikeda">Ikeda Map (Optical Cavity)</option>
+              <option value="2d_map:gumowski">Gumowski-Mira (Particle Accelerator)</option>
+              <option value="2d_map:tinkerbell">Tinkerbell Map (Discrete Vortex)</option>
             </optgroup>
             <optgroup label="Physical and Mathematical Dynamics">
               <option value="pendulum:double_pendulum">Double Pendulum (Lyapunov Swarm)</option>
-              <option value="bifurcation:logistic">Feigenbaum Bifurcation Cascade</option>
+              <option value="bifurcation:logistic">Feigenbaum Cascade (Period Doubling)</option>
             </optgroup>
             <optgroup label="Custom Sandbox">
-              <option value="custom:sandbox">Custom Formula Sandbox</option>
+              <option value="custom:sandbox">Custom Sandbox (User Equation Editor)</option>
             </optgroup>
           </select>
         </div>
 
-        <!-- Custom Formula Sandbox -->
-        <div id="custom-formula-section">
-          <label class="control-label" for="custom-formula-input">Update Equation: x_{n+1} = f(x, y)</label>
-          <input type="text" id="custom-formula-input" class="formula-input" value="sin(a * y) - cos(b * x)" placeholder="e.g. sin(a*y) - cos(b*x)" />
-          <button id="btn-compile-formula" class="btn-glass btn-primary" style="width:100%;">Compile and Run</button>
-          <div id="formula-error"></div>
+        <!-- Custom Formula Sandbox (Interactive Equation Editor) -->
+        <div id="custom-formula-section" class="custom-sandbox-panel">
+          <div class="sandbox-header">
+            <span class="control-label" style="font-weight: 600; color: var(--accent-cyan);">Equation Editor</span>
+            <button type="button" id="btn-toggle-keypad" class="btn-icon-subtle" data-tooltip="Toggle on-screen math keypad" aria-label="Toggle math keypad">
+              <i class="fas fa-keyboard"></i>
+            </button>
+          </div>
+
+          <!-- Quick Equation Templates -->
+          <div class="control-group" style="margin-bottom: 8px;">
+            <label class="control-label" for="custom-template-select">Equation Template</label>
+            <select id="custom-template-select" class="glass-select" style="padding: 6px 8px; font-size: 12px;">
+              <option value="peter_dejong" selected>Peter de Jong (Harmonic Orbit)</option>
+              <option value="clifford">Clifford Map (Toroidal Lattice)</option>
+              <option value="hopalong">Hopalong Attractor (Fractal Web)</option>
+              <option value="ikeda">Ikeda Map (Optical Cavity)</option>
+              <option value="gumowski">Gumowski-Mira (Particle Accelerator)</option>
+              <option value="tinkerbell">Tinkerbell Map (Discrete Vortex)</option>
+              <option value="sprott_3d">Sprott Map (3D Phase Space)</option>
+              <option value="blank">Blank (Empty Scratchpad)</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Equation Inputs Container -->
+          <div id="math-equations-list"></div>
+
+          <!-- Add Equation Action Button -->
+          <button type="button" id="btn-add-equation" class="btn-glass btn-add-eq" data-tooltip="Add another equation line (e.g. z_{n+1} or helper variable)">
+            <i class="fas fa-plus"></i>
+            <span class="btn-label">Add Equation</span>
+          </button>
+
+          <!-- Collapsible Virtual Math Keypad -->
+          <div id="custom-math-keypad" class="math-keypad-container collapsed">
+            <div class="keypad-grid">
+              <button type="button" class="keypad-btn" data-latex="\sin(">\sin</button>
+              <button type="button" class="keypad-btn" data-latex="\cos(">\cos</button>
+              <button type="button" class="keypad-btn" data-latex="\tan(">\tan</button>
+              <button type="button" class="keypad-btn" data-latex="\sqrt{">√x</button>
+              <button type="button" class="keypad-btn" data-latex="^2">x²</button>
+              <button type="button" class="keypad-btn" data-latex="^{">xʸ</button>
+              <button type="button" class="keypad-btn" data-latex="\frac{}{}"><span style="font-size:11px;">a/b</span></button>
+              <button type="button" class="keypad-btn" data-latex="\pi">π</button>
+              <button type="button" class="keypad-btn" data-latex="e">e</button>
+
+              <button type="button" class="keypad-btn" data-latex="x">x</button>
+              <button type="button" class="keypad-btn" data-latex="y">y</button>
+              <button type="button" class="keypad-btn" data-latex="a">a</button>
+              <button type="button" class="keypad-btn" data-latex="b">b</button>
+              <button type="button" class="keypad-btn" data-latex="c">c</button>
+              <button type="button" class="keypad-btn" data-latex="d">d</button>
+              <button type="button" class="keypad-btn" data-latex="+">+</button>
+              <button type="button" class="keypad-btn" data-latex="-">−</button>
+              <button type="button" class="keypad-btn" data-latex="\cdot">×</button>
+            </div>
+          </div>
+
+          <div id="formula-error" class="formula-status"></div>
         </div>
 
         <!-- Palette Selector -->
@@ -217,8 +269,8 @@
           <span id="tour-author" class="deck-author">Edward Lorenz (MIT, 1963)</span>
         </div>
         <div class="deck-window-controls">
-          <button id="tour-deck-minimize" class="deck-btn-icon" data-tooltip="Minimize / restore exhibit story deck"><i class="fas fa-window-minimize"></i></button>
-          <button id="tour-deck-close" class="deck-btn-icon" data-tooltip="Close museum tour"><i class="fas fa-times"></i></button>
+          <button id="tour-deck-minimize" class="deck-btn-icon" data-tooltip="Minimize / restore exhibit story deck" aria-label="Minimize Tour Deck"><i class="fas fa-window-minimize"></i></button>
+          <button id="tour-deck-close" class="deck-btn-icon" data-tooltip="Close museum tour" aria-label="Close Tour Deck"><i class="fas fa-times"></i></button>
         </div>
       </div>
 
@@ -323,13 +375,15 @@
             </div>
 
             <div class="tutorial-card">
-              <div class="tutorial-card-icon"><i class="fas fa-terminal"></i></div>
-              <h3>3. Custom Formula Sandbox</h3>
-              <p>Select <strong>"Custom Sandbox"</strong> from the dropdown to write your own equations:</p>
+              <div class="tutorial-card-icon"><i class="fas fa-square-root-variable"></i></div>
+              <h3>3. Equation Editor & Custom Sandbox</h3>
+              <p>Select <strong>"Custom Formula Sandbox"</strong> from the dropdown to craft custom dynamical systems:</p>
               <ul>
-                <li>Type formulas like <code>sin(a * y) - cos(b * x)</code></li>
-                <li>Supports trigonometric, exponential, and algebraic functions</li>
-                <li>Runs with safe zero-allocation bytecode compilation at 60 FPS</li>
+                <li><strong>Visual Math Typography:</strong> Enter fractions, exponents (<code>x²</code>), radicals (<code>√</code>), and absolute values (<code>|x|</code>) in real time</li>
+                <li><strong>2D & 3D Multi-Equation Slots:</strong> Write <code>x<sub>n+1</sub></code> and <code>y<sub>n+1</sub></code> for 2D discrete maps, or add <code>z<sub>n+1</sub></code> to create 3D volumetric attractors</li>
+                <li><strong>Auto-Generated Sliders:</strong> Introducing custom variables (e.g. <em>a</em>, <em>b</em>, <em>c</em>, <em>u</em>) instantly generates live tuning sliders in the drawer</li>
+                <li><strong>On-Screen Math Keypad:</strong> Click the keyboard icon for one-tap entry of mathematical functions and constants (&pi;, &theta;)</li>
+                <li><strong>High-Speed Execution:</strong> Compiled natively with zero allocation for fluid 60 FPS simulation</li>
               </ul>
             </div>
 
@@ -341,7 +395,6 @@
                 <li><strong>Audio:</strong> Click "Audio: ON" for soothing Zen singing bowls</li>
                 <li><strong>Vector SVG:</strong> Export plotter vector line drawings</li>
                 <li><strong>4K Wallpaper:</strong> Generates a pristine 3840x2160 PNG render</li>
-                <li><strong>Record Video:</strong> Live 60FPS video recording for as long as you wish</li>
                 <li><strong>Share:</strong> Copies link preserving your exact parameters</li>
               </ul>
             </div>
