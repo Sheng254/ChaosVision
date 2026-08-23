@@ -6,7 +6,7 @@
 [![Performance](https://img.shields.io/badge/Frame%20Rate-Locked%2060%20FPS-ff007f.svg)]()
 
 <div align="center">
-  <img src="assets/chaosvision_demo.gif" alt="ChaosVision Interactive Studio Showcase" width="100%" style="border-radius: 12px; border: 1px solid rgba(0, 242, 254, 0.35); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);" />
+  <img src="assets/chaosvision.webp" alt="ChaosVision Interactive Studio Showcase" width="100%" style="border-radius: 12px; border: 1px solid rgba(0, 242, 254, 0.35); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);" />
   <p><em>Real-time 3D trajectory ribbons, Lyapunov divergence tracking, and live generative soundscapes.</em></p>
 </div>
 
@@ -95,7 +95,7 @@ ChaosVision/
 ├── LICENSE                 # MIT Open Source License (c) 2026 Sheng254
 ├── README.md               # Technical documentation
 ├── assets/
-│   ├── chaosvision_demo.gif # Animated demonstration of 3D chaotic ribbons
+│   ├── chaosvision.webp    # Animated demonstration of 3D chaotic ribbons
 │   └── gallery_showcase.png# 4-tile comparative systems gallery
 └── src/
     ├── main.js             # Main render loop coordinator and lifecycle manager
