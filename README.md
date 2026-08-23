@@ -76,7 +76,7 @@ Built with native ECMAScript modules, direct HTML5 Canvas projection pipelines, 
 | **Halvorsen Attractor** | 3D Continuous | $\dot{x} = -ax - 4y - 4z - y^2, \dot{y} = -ay - 4z - 4x - z^2, \dot{z} = -az - 4x - 4y - x^2$ | $a$ (Coupling / Dissipation) |
 | **Peter de Jong Map** | 2D Discrete | $x_{n+1} = \sin(ay_n) - \cos(bx_n), y_{n+1} = \sin(cx_n) - \cos(dy_n)$ | $a, b, c, d$ (Interference Harmonics) |
 | **Clifford Map** | 2D Discrete | $x_{n+1} = \sin(ay_n) + c\cos(ax_n), y_{n+1} = \sin(bx_n) + d\cos(by_n)$ | $a, b, c, d$ (Toroidal Frequencies) |
-| **Hopalong Attractor** | 2D Discrete | $x_{n+1} = y_n - \operatorname{sgn}(x_n)\sqrt{\|bx_n - c\|}, y_{n+1} = a - x_n$ | $a, b, c$ (Fractal Displacement) |
+| **Hopalong Attractor** | 2D Discrete | $x_{n+1} = y_n - \mathrm{sgn}(x_n)\sqrt{\vert bx_n - c \vert}, y_{n+1} = a - x_n$ | $a, b, c$ (Fractal Displacement) |
 | **Ikeda Map** | 2D Discrete | $t = k - \frac{p}{1+x^2+y^2}, x_{n+1} = 1+u(x\cos t - y\sin t), y_{n+1} = u(x\sin t + y\cos t)$ | $u$ (Reflectivity), $p$ (Refraction) |
 | **Gumowski-Mira Map** | 2D Discrete | $x_{n+1} = y + \alpha(1-\beta y^2)y + F(x), y_{n+1} = -x + F(x_{n+1})$ | $\alpha$ (Perturbation), $\mu$ (Stability) |
 | **Tinkerbell Map** | 2D Discrete | $x_{n+1} = x_n^2 - y_n^2 + ax_n + by_n, y_{n+1} = 2x_n y_n + cx_n + dy_n$ | $a, b, c, d$ (Quadratic Shear) |
