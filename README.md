@@ -53,7 +53,7 @@ Built with native ECMAScript modules, direct HTML5 Canvas projection pipelines, 
 * **100% Deterministic Physics Alignment**: 
   * *3D Attractors*: Orbital curvature turning cusps and $z$-elevation drive pitch and left-right panning.
   * *Double Pendulum*: Lagrangian kinetic energy peaks and outer bob height drive resonant singing bowls and celestial bell flips.
-  * *2D Discrete Maps & Sandbox*: Polar phase angle $\theta = \operatorname{atan2}(y, x)$ directly traces the fractal's geometric winding number.
+  * *2D Discrete Maps & Sandbox*: Polar phase angle $\theta = \mathrm{atan2}(y, x)$ directly traces the fractal's geometric winding number.
   * *Bifurcation Cascade*: State coordinate $x$ sonifies pure harmonic intervals in periodic windows and complex shimmering chords in chaos.
 
 ### 4. Interactive Live Museum Tour

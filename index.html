@@ -5,12 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     <title>ChaosVision</title>
     
+    <!-- DNS Preconnect for Performance & Core Web Vitals -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+
     <!-- Primary Meta Tags -->
     <meta name="title" content="ChaosVision" />
     <meta name="description" content="An interactive computational laboratory and generative art studio for non-linear dynamical systems, 3D strange attractors, double pendulum swarms, and fractal bifurcations." />
-    <meta name="keywords" content="Chaos Theory, Strange Attractor, Lorenz Attractor, Aizawa Attractor, Double Pendulum, Lyapunov Exponent, Feigenbaum Bifurcation, Generative Art, Web Audio API, Canvas 3D, Sheng254, Nonlinear Dynamics, Mathematical Physics" />
+    <meta name="keywords" content="Chaos Theory, Strange Attractor, Lorenz Attractor, Aizawa Attractor, Double Pendulum, Lyapunov Exponent, Feigenbaum Bifurcation, Generative Art, Web Audio API, Canvas 3D, Sheng254, Nonlinear Dynamics, Mathematical Physics, Clifford Map, Peter de Jong Map, Halvorsen, Thomas Attractor, Rossler, Chen System" />
     <meta name="author" content="Sheng254" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="rating" content="General" />
     <meta name="theme-color" content="#05050a" />
     <meta name="color-scheme" content="dark" />
     <link rel="canonical" href="https://sheng254.github.io/ChaosVision/" />
@@ -24,37 +33,70 @@
     <meta property="og:title" content="ChaosVision" />
     <meta property="og:description" content="Explore deterministic chaos, 3D strange attractors, double pendulum swarms, and generative ambient soundscapes in real-time." />
     <meta property="og:site_name" content="ChaosVision" />
-    <meta property="og:image" content="https://sheng254.github.io/ChaosVision/assets/preview_banner.png" />
+    <meta property="og:image" content="https://sheng254.github.io/ChaosVision/assets/chaosvision.webp" />
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:alt" content="ChaosVision 3D Strange Attractors and Chaos Theory Simulation Studio" />
 
     <!-- Twitter / X Card Previews -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://sheng254.github.io/ChaosVision/" />
     <meta name="twitter:title" content="ChaosVision" />
     <meta name="twitter:description" content="Explore deterministic chaos, 3D strange attractors, double pendulum swarms, and generative ambient soundscapes in real-time." />
-    <meta name="twitter:image" content="https://sheng254.github.io/ChaosVision/assets/preview_banner.png" />
+    <meta name="twitter:image" content="https://sheng254.github.io/ChaosVision/assets/chaosvision.webp" />
+    <meta name="twitter:image:alt" content="ChaosVision 3D Strange Attractors and Chaos Theory Simulation Studio" />
     <meta name="twitter:creator" content="@Sheng254" />
 
     <!-- Schema.org JSON-LD Structured Data for Search Engines -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "ChaosVision",
-      "url": "https://sheng254.github.io/ChaosVision/",
-      "description": "An interactive computational laboratory and generative art studio for non-linear dynamical systems, 3D strange attractors, double pendulum swarms, and fractal bifurcations.",
-      "applicationCategory": "EducationalApplication, MultimediaApplication",
-      "operatingSystem": "All",
-      "author": {
-        "@type": "Person",
-        "name": "Sheng254",
-        "url": "https://github.com/Sheng254"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "keywords": "Chaos Theory, Strange Attractors, Lorenz, Double Pendulum, Bifurcation, Web Audio API, Generative Art"
+      "@graph": [
+        {
+          "@type": "WebApplication",
+          "@id": "https://sheng254.github.io/ChaosVision/#webapp",
+          "name": "ChaosVision",
+          "url": "https://sheng254.github.io/ChaosVision/",
+          "description": "An interactive computational laboratory and generative art studio for non-linear dynamical systems, 3D strange attractors, double pendulum swarms, and fractal bifurcations.",
+          "applicationCategory": "EducationalApplication, MultimediaApplication, Simulation",
+          "applicationSubCategory": "Interactive Physics & Mathematical Simulation",
+          "operatingSystem": "All modern web browsers (Chrome, Firefox, Safari, Edge)",
+          "browserRequirements": "Requires WebGL or HTML5 Canvas and Web Audio API support",
+          "inLanguage": "en",
+          "isAccessibleForFree": true,
+          "author": {
+            "@type": "Person",
+            "name": "Sheng254",
+            "url": "https://github.com/Sheng254"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "screenshot": "https://sheng254.github.io/ChaosVision/assets/chaosvision.webp",
+          "featureList": [
+            "3D Continuous Strange Attractors: Lorenz Attractor, Aizawa Attractor, Thomas Labyrinth, Rossler Attractor, Chen System, Halvorsen Attractor",
+            "2D Discrete Chaotic Maps: Peter de Jong Map, Clifford Map, Hopalong Attractor, Ikeda Optical Cavity, Gumowski-Mira, Tinkerbell Map",
+            "Lagrangian Double Pendulum Swarm with Lyapunov Divergence Tracking",
+            "3D Feigenbaum Bifurcation Delay Coordinate Manifold",
+            "Visual AST Equation Editor with Real-Time Math Compilation",
+            "8-Voice Polyphonic Physics-Coupled Generative Zen Soundscapes (Web Audio API)",
+            "13-Exhibit Interactive Museum Tour Deck with Educational Scientific Narratives",
+            "High-Resolution 4K Ultra-HD Wallpaper Renderer",
+            "Universal Vector SVG Path Exporter for Plotters and Laser Cutters",
+            "High-Fidelity Parameter URL Serialization and Sharing"
+          ],
+          "keywords": "Chaos Theory, Strange Attractors, Lorenz Attractor, Aizawa Attractor, Double Pendulum, Lyapunov Exponent, Feigenbaum Bifurcation, Generative Art, Web Audio API, Canvas 3D, Sheng254, Nonlinear Dynamics, Mathematical Physics, Peter de Jong Map, Clifford Map, Halvorsen, Thomas Attractor, Rossler, Chen System, Numerical Integration RK4"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://sheng254.github.io/ChaosVision/#website",
+          "url": "https://sheng254.github.io/ChaosVision/",
+          "name": "ChaosVision",
+          "description": "Interactive 3D Strange Attractor & Chaos Theory Laboratory",
+          "inLanguage": "en"
+        }
+      ]
     }
     </script>
 
@@ -73,7 +115,7 @@
     <nav class="top-nav">
       <div class="brand-section">
         <span class="brand-logo">🌀</span>
-        <span class="brand-title">ChaosVision</span>
+        <h1 class="brand-title">ChaosVision</h1>
       </div>
 
       <div class="nav-actions">
@@ -432,6 +474,40 @@
         </div>
       </div>
     </div>
+
+    <!-- Search Engine Indexing & Accessible Fallback Content (Rendered for Web Crawlers and Non-JS Clients) -->
+    <noscript>
+      <section class="sr-noscript-content" style="padding: 24px; color: #f8f9fa; background: #05050a; font-family: sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto;">
+        <h2>ChaosVision — Interactive 3D Strange Attractors & Chaos Theory Laboratory</h2>
+        <p>ChaosVision is an interactive computational laboratory and generative art studio for non-linear dynamical systems, deterministic chaos, strange attractors, double pendulum swarms, and fractal bifurcations.</p>
+        
+        <h3>Dynamical Systems & Mathematical Models</h3>
+        <ul>
+          <li><strong>Lorenz Attractor (3D Continuous):</strong> Discovered by Edward Lorenz in 1963 at MIT. Demonstrates deterministic chaos and the Butterfly Effect in atmospheric convection. Differential equations: dx/dt = &sigma;(y - x), dy/dt = x(&rho; - z) - y, dz/dt = xy - &beta;z.</li>
+          <li><strong>Aizawa Attractor (3D Continuous):</strong> Sphere-inverting continuous 3D attractor featuring rotating vortex structures and topological manifolds.</li>
+          <li><strong>Thomas Labyrinth (3D Continuous):</strong> Cyclically symmetric non-linear differential equations producing a frictionless 3D labyrinthine trajectory.</li>
+          <li><strong>Rössler Attractor (3D Continuous):</strong> Continuous 3D chaotic attractor exhibiting topological Möbius band stretching and folding.</li>
+          <li><strong>Chen System (3D Continuous):</strong> Dual-vortex chaotic system bridging Lorenz-type attractors with hyperchaotic topologies.</li>
+          <li><strong>Halvorsen Attractor (3D Continuous):</strong> Tri-symmetric cyclically coupled differential equations with striking orbital lobes.</li>
+          <li><strong>Peter de Jong Map (2D Discrete):</strong> Sinusoidal discrete iterative map producing smooth, woven silk-like fractal attractor density manifolds.</li>
+          <li><strong>Clifford Map (2D Discrete):</strong> Toroidal sinusoidal lattice map generating complex geometric interference patterns and strange attractors.</li>
+          <li><strong>Hopalong Attractor (2D Discrete):</strong> Discrete fractal web discovered by Barry Martin using signum and square root perturbations.</li>
+          <li><strong>Ikeda Map (2D Discrete):</strong> Discrete dynamical system modeling optical bistability, non-linear dielectric laser cavity phase shifts, and chaos.</li>
+          <li><strong>Gumowski-Mira Map (2D Discrete):</strong> High-energy particle accelerator dynamics map developed at CERN displaying intricate resonant islands.</li>
+          <li><strong>Tinkerbell Map (2D Discrete):</strong> 2D quadratic dynamical map producing pinned swirling vortices and discrete chaotic orbits.</li>
+          <li><strong>Double Pendulum Swarm (Lagrangian Mechanics):</strong> Chaotic mechanical double pendulum integrated via 4th-Order Runge-Kutta (RK4) with real-time Lyapunov divergence tracking.</li>
+          <li><strong>Feigenbaum Bifurcation Cascade (3D Delay Manifold):</strong> Spatial 3D delay-coordinate embedding (r, x_n, x_{n-1}) visualizing period-doubling route to chaos.</li>
+          <li><strong>Visual AST Equation Editor & Custom Sandbox:</strong> Safe AST tokenizer and bytecode formula compiler for real-time 2D/3D custom mathematical expressions.</li>
+        </ul>
+
+        <h3>Core Computational & Studio Capabilities</h3>
+        <ul>
+          <li><strong>Numerical Integrator:</strong> Runge-Kutta 4th-Order (RK4) solver with adaptive sub-stepping up to 64 steps/frame.</li>
+          <li><strong>Generative Soundscape:</strong> 8-Voice polyphonic Web Audio API sonification tuned to harmonic pentatonic scales ($C_4$ to $C_6$).</li>
+          <li><strong>Exporters:</strong> Asynchronous 4K Ultra-HD offscreen renderer and universal vector SVG export for plotters.</li>
+        </ul>
+      </section>
+    </noscript>
 
     <!-- Application Script (ES Module) -->
     <script type="module" src="src/main.js"></script>
