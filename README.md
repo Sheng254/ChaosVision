@@ -34,23 +34,27 @@ Built with native ECMAScript modules, direct HTML5 Canvas projection pipelines, 
 ## Key Features
 
 ### 1. High-Precision Numerical Integrators & Dynamics
-* **Runge-Kutta 4th-Order (RK4) Solver**: High-precision numerical integration for continuous differential equations with finite-number boundary recovery.
-* **Lagrangian Dynamics Engine**: Simulates multi-pendulum mechanical systems with 16 sub-steps per frame to prevent energy drift.
-* **Visual Equation Editor & Multi-Equation AST Sandbox**: Real-time visual math input with formatted LaTeX translation, 2D/3D multi-equation compiling ($x_{n+1}, y_{n+1}, z_{n+1}$), and automatic parameter binding.
+* **Runge-Kutta 4th-Order (RK4) Solver**: High-precision numerical integration for continuous differential equations with adaptive sub-stepping (up to 64 steps/frame) and finite-number boundary recovery.
+* **Lagrangian Dynamics Engine**: Simulates multi-pendulum mechanical systems with kinetic/potential energy monitoring and automatic rest-state re-energization when friction is adjusted.
+* **Visual Equation Editor & Multi-Equation AST Sandbox**: Real-time visual math input with formatted LaTeX translation, 2D/3D multi-equation compiling ($x_{n+1}, y_{n+1}, z_{n+1}$), and isolated parameter scope.
 * **Lyapunov Divergence Tracking**: Calculates Euclidean phase-space separation across parallel trajectories initialized with microscopic $10^{-4}$ offsets.
 * **3D Phase-Space Feigenbaum Bifurcation Cascade**: Canonical $(r, x_n, x_{n-1})$ delay-coordinate embedding combining classical 2D diagrams with 3D period-doubling spatial manifolds.
 * **Anti-Stall & Anti-Collapse Watchdog**: Real-time velocity monitoring prevents discrete maps from collapsing into single-point equilibrium traps.
 
 ### 2. Unified Rendering & Camera Architecture
-* **High-Density Density Accumulator**: Accumulates millions of particle iterations with logarithmic exposure tone-mapping.
+* **Adaptive Density Accumulator**: Accumulates millions of particle iterations with zoom-compensated batch scaling (up to $100,000+$ pts/frame) and adaptive point sizing to preserve luminosity.
 * **Unified 3D Perspective Projection Engine**: Full 3-axis pitch, yaw, pan, and perspective scaling across continuous attractors, discrete maps, pendulums, and bifurcations.
-* **Inertial 60/120Hz Multi-Touch Camera**: Smooth orbit navigation with velocity tracking, momentum gliding, shift-drag panning, and dual-finger pinch zoom.
+* **Inertial Multi-Touch Camera & Universal Auto-Rotation**: Frame-rate independent constant angular velocity ($\omega = 0.15\text{ rad/s}$) across all systems with seamless drag-pause and instant resumption.
 * **Curated Designer Color Gradients**: Bioluminescence, Cyberpunk, CRT Matrix Green, Solar Flare, Cosmic Nebula, Electric Amethyst, and Infrared.
 
-### 3. Generative Zen Soundscapes (Web Audio API)
-* **8-Voice Polyphonic Voice Pool**: Discrete decaying singing bowl and crystal chime plucks.
+### 3. Physics-Coupled Generative Zen Soundscapes (Web Audio API)
+* **8-Voice Polyphonic Voice Pool**: Discrete decaying singing bowl and crystal chime plucks with analog warm lowpass filtering.
 * **Harmonic Pentatonic Tuning**: Calibrated to C Major 9 and A Minor scales ($C_4$ through $C_6$).
-* **Motion-Coupled Spatial Audio**: Automatically maps 3D orbital turns to frequency plucks and left-right stereo panning.
+* **100% Deterministic Physics Alignment**: 
+  * *3D Attractors*: Orbital curvature turning cusps and $z$-elevation drive pitch and left-right panning.
+  * *Double Pendulum*: Lagrangian kinetic energy peaks and outer bob height drive resonant singing bowls and celestial bell flips.
+  * *2D Discrete Maps & Sandbox*: Polar phase angle $\theta = \operatorname{atan2}(y, x)$ directly traces the fractal's geometric winding number.
+  * *Bifurcation Cascade*: State coordinate $x$ sonifies pure harmonic intervals in periodic windows and complex shimmering chords in chaos.
 
 ### 4. Interactive Live Museum Tour
 * **Draggable Exhibit Deck**: Floating, repositionable educational card synchronized with the live canvas simulation.
