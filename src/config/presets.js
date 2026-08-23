@@ -413,3 +413,128 @@ export const MUSEUM_EXHIBITS = [
     realWorldImpact: 'Used in cardiology to predict sudden cardiac arrhythmias, in ecology to manage fisheries and prevent population collapses, and in financial market risk analysis.'
   }
 ];
+
+export const CUSTOM_TEMPLATES = {
+  peter_dejong: {
+    id: 'peter_dejong',
+    name: 'Peter de Jong (Harmonic Orbit)',
+    eqs: [
+      { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - \\cos(b \\cdot x)' },
+      { id: 'eq_y', target: 'y', latex: '\\sin(c \\cdot x) - \\cos(d \\cdot y)' }
+    ],
+    params: { a: 1.4, b: -2.3, c: 2.4, d: -2.1 },
+    paramRanges: {
+      a: { min: -3.0, max: 3.0, step: 0.05, label: 'a' },
+      b: { min: -3.0, max: 3.0, step: 0.05, label: 'b' },
+      c: { min: -3.0, max: 3.0, step: 0.05, label: 'c' },
+      d: { min: -3.0, max: 3.0, step: 0.05, label: 'd' }
+    },
+    scale: 0.20
+  },
+  clifford: {
+    id: 'clifford',
+    name: 'Clifford Map (Toroidal Lattice)',
+    eqs: [
+      { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) + c \\cdot \\cos(a \\cdot x)' },
+      { id: 'eq_y', target: 'y', latex: '\\sin(b \\cdot x) + d \\cdot \\cos(b \\cdot y)' }
+    ],
+    params: { a: -1.4, b: 1.6, c: 1.0, d: 0.7 },
+    paramRanges: {
+      a: { min: -3.0, max: 3.0, step: 0.05, label: 'a' },
+      b: { min: -3.0, max: 3.0, step: 0.05, label: 'b' },
+      c: { min: -3.0, max: 3.0, step: 0.05, label: 'c' },
+      d: { min: -3.0, max: 3.0, step: 0.05, label: 'd' }
+    },
+    scale: 0.22
+  },
+  hopalong: {
+    id: 'hopalong',
+    name: 'Hopalong Attractor (Fractal Web)',
+    eqs: [
+      { id: 'eq_x', target: 'x', latex: 'y - \\operatorname{sign}(x) \\cdot \\sqrt{\\left| b \\cdot x - c \\right|}' },
+      { id: 'eq_y', target: 'y', latex: 'a - x' }
+    ],
+    params: { a: 2.0, b: 1.0, c: 0.0 },
+    paramRanges: {
+      a: { min: -10.0, max: 10.0, step: 0.1, label: 'a' },
+      b: { min: 0.1, max: 10.0, step: 0.1, label: 'b' },
+      c: { min: -10.0, max: 10.0, step: 0.1, label: 'c' }
+    },
+    scale: 0.03
+  },
+  ikeda: {
+    id: 'ikeda',
+    name: 'Ikeda Map (Optical Cavity)',
+    eqs: [
+      { id: 'eq_t', target: 't', latex: '0.4 - \\frac{6}{1 + x^2 + y^2}' },
+      { id: 'eq_x', target: 'x', latex: '1 + u \\cdot (x \\cdot \\cos(t) - y \\cdot \\sin(t))' },
+      { id: 'eq_y', target: 'y', latex: 'u \\cdot (x \\cdot \\sin(t) + y \\cdot \\cos(t))' }
+    ],
+    params: { u: 0.9 },
+    paramRanges: {
+      u: { min: 0.1, max: 1.0, step: 0.01, label: 'u' }
+    },
+    scale: 0.28
+  },
+  gumowski: {
+    id: 'gumowski',
+    name: 'Gumowski-Mira (Particle Accelerator)',
+    eqs: [
+      { id: 'eq_x', target: 'x', latex: 'y + a \\cdot (1 - 0.05 \\cdot y^2) \\cdot y + \\frac{2 \\cdot x}{1 + x^2}' },
+      { id: 'eq_y', target: 'y', latex: '-x + \\frac{2 \\cdot y}{1 + y^2}' }
+    ],
+    params: { a: 0.008, b: 0.05 },
+    paramRanges: {
+      a: { min: -0.5, max: 0.5, step: 0.001, label: 'a' },
+      b: { min: 0.01, max: 0.2, step: 0.005, label: 'b' }
+    },
+    scale: 0.055
+  },
+  tinkerbell: {
+    id: 'tinkerbell',
+    name: 'Tinkerbell Map (Discrete Vortex)',
+    eqs: [
+      { id: 'eq_x', target: 'x', latex: 'x^2 - y^2 + a \\cdot x + b \\cdot y' },
+      { id: 'eq_y', target: 'y', latex: '2 \\cdot x \\cdot y + c \\cdot x + d \\cdot y' }
+    ],
+    params: { a: 0.9, b: -0.6, c: 2.0, d: 0.5 },
+    paramRanges: {
+      a: { min: -2.0, max: 2.0, step: 0.05, label: 'a' },
+      b: { min: -2.0, max: 2.0, step: 0.05, label: 'b' },
+      c: { min: -3.0, max: 3.0, step: 0.05, label: 'c' },
+      d: { min: -2.0, max: 2.0, step: 0.05, label: 'd' }
+    },
+    scale: 0.35
+  },
+  sprott_3d: {
+    id: 'sprott_3d',
+    name: 'Sprott Map (3D Phase Space)',
+    eqs: [
+      { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - z \\cdot \\cos(b \\cdot x)' },
+      { id: 'eq_y', target: 'y', latex: 'z \\cdot \\sin(c \\cdot x) - \\cos(d \\cdot y)' },
+      { id: 'eq_z', target: 'z', latex: '\\sin(x)' }
+    ],
+    params: { a: 2.24, b: -0.65, c: 0.43, d: -2.43 },
+    paramRanges: {
+      a: { min: -3.0, max: 3.0, step: 0.05, label: 'a' },
+      b: { min: -3.0, max: 3.0, step: 0.05, label: 'b' },
+      c: { min: -3.0, max: 3.0, step: 0.05, label: 'c' },
+      d: { min: -3.0, max: 3.0, step: 0.05, label: 'd' }
+    },
+    scale: 0.20
+  },
+  blank: {
+    id: 'blank',
+    name: 'Blank (Empty Scratchpad)',
+    eqs: [
+      { id: 'eq_x', target: 'x', latex: '' },
+      { id: 'eq_y', target: 'y', latex: '' }
+    ],
+    params: { a: 1.0, b: 1.0 },
+    paramRanges: {
+      a: { min: -3.0, max: 3.0, step: 0.05, label: 'a' },
+      b: { min: -3.0, max: 3.0, step: 0.05, label: 'b' }
+    },
+    scale: 0.25
+  }
+};

@@ -7,6 +7,7 @@
 import { samplePalette, COLOR_PALETTES } from '../config/palettes.js';
 import { RK4Integrator } from '../math/rk4.js';
 import { ATTRACTORS_3D, ATTRACTORS_2D } from '../math/attractors.js';
+import { CUSTOM_TEMPLATES } from '../config/presets.js';
 
 export class StudioExporter {
   /**
@@ -107,6 +108,8 @@ export class StudioExporter {
       } else if (app.customCompiledSystem) {
         const compiled = app.customCompiledSystem;
         iterateFn = (x, y, z, p) => compiled(x, y, z, 0, p);
+        const tmpl = CUSTOM_TEMPLATES[app.customTemplateId] || CUSTOM_TEMPLATES.peter_dejong;
+        scaleFactor = tmpl.scale || 0.20;
       }
 
       if (iterateFn) {

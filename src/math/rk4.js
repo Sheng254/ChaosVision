@@ -105,15 +105,16 @@ export class TrajectorySwarm {
    * @param {number} count - Number of parallel trajectories
    */
   init(baseInitial = [0.1, 0.0, 0.0], count = 3) {
+    this.baseInitial = baseInitial ? baseInitial.slice() : [0.1, 0.0, 0.0];
     this.capacity = count;
     this.trajectories = [];
 
     for (let i = 0; i < count; i++) {
       const offset = i === 0 ? 0 : this.initialPerturbation * i;
       const state = [
-        baseInitial[0] + offset,
-        baseInitial[1] + offset * 0.5,
-        baseInitial[2] + offset * 0.25
+        this.baseInitial[0] + offset,
+        this.baseInitial[1] + offset * 0.5,
+        this.baseInitial[2] + offset * 0.25
       ];
 
       this.trajectories.push({
@@ -146,9 +147,11 @@ export class TrajectorySwarm {
         if (!isFinite(nextState[0]) || !isFinite(nextState[1]) || !isFinite(nextState[2]) ||
             Math.abs(nextState[0]) > 5e3 || Math.abs(nextState[1]) > 5e3 || Math.abs(nextState[2]) > 5e3) {
           const offset = i === 0 ? 0 : this.initialPerturbation * i;
-          traj.state = [0.1 + offset, offset * 0.5, offset * 0.25];
+          const base = this.baseInitial || [0.1, 0.0, 0.0];
+          traj.state = [base[0] + offset, base[1] + offset * 0.5, base[2] + offset * 0.25];
           traj.trail = new TrailBuffer(this.maxTrailLength);
           traj.trail.push(traj.state.slice());
+          traj.speed = 0;
           continue;
         }
 

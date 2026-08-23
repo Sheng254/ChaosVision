@@ -61,7 +61,7 @@ export class Canvas2DRenderer {
     const fov = 600;
     const distance = 800;
 
-    const lut = this.getPaletteLUT(paletteId, 0.22);
+    const lut = this.getPaletteLUT(paletteId, 0.24);
 
     this.ctx.save();
     this.ctx.globalCompositeOperation = 'lighter';
@@ -70,6 +70,9 @@ export class Canvas2DRenderer {
     let y = this.currY;
     let z = this.currZ;
     const is3D = iterateFn.length > 3;
+
+    // Adaptive point size based on zoom depth (prevents disappearing into darkness when zoomed)
+    const pointSize = Math.max(1.2, Math.min(2.6, 1.2 + 0.35 * Math.log2(Math.max(1, zoom))));
 
     let lastColor = null;
 
@@ -122,7 +125,7 @@ export class Canvas2DRenderer {
           this.ctx.fillStyle = color;
           lastColor = color;
         }
-        this.ctx.fillRect(px, py, 1.2, 1.2);
+        this.ctx.fillRect(px, py, pointSize, pointSize);
       }
     }
 

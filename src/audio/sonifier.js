@@ -171,34 +171,158 @@ export class ChaoticSonifier {
   }
 
   /**
-   * Modulates melodic plucks naturally timed with chaotic orbital momentum.
+   * Modulates melodic plucks naturally timed with chaotic 3D orbital dynamics.
+   * Driven by phase-space elevation, velocity magnitude, and orbital curvature turning points.
    */
-  update(state = [0, 0, 0], speed = 1.0) {
+  update(state = [0, 0, 0], speed = 1.0, center = [0, 0, 0]) {
     if (!this.isPlaying || !this.ctx) return;
 
     const [x, y, z] = state;
     const now = this.ctx.currentTime;
 
-    // Calculate instantaneous motion delta
     const dx = x - this.prevX;
     const dy = y - this.prevY;
     const dz = z - this.prevZ;
     const motionMag = Math.hypot(dx, dy, dz);
 
+    // Directional turning curvature detection
+    const prevMag = Math.hypot(this.prevDx || 0, this.prevDy || 0, this.prevDz || 0);
+    const dot = (dx * (this.prevDx || 0) + dy * (this.prevDy || 0) + dz * (this.prevDz || 0));
+    const cosAngle = (motionMag > 1e-4 && prevMag > 1e-4) ? (dot / (motionMag * prevMag)) : 1.0;
+    const isTurning = cosAngle < 0.97;
+
     this.prevX = x;
     this.prevY = y;
     this.prevZ = z;
+    this.prevDx = dx;
+    this.prevDy = dy;
+    this.prevDz = dz;
 
-    // Trigger gentle crystal chimes at rhythmic orbital turns
+    // Trigger deterministically at orbital turning cusps and inflection points (zero randomness)
     if (now - this.lastTriggerTime >= this.minInterval) {
-      if (motionMag > 0.08 || Math.random() < 0.06) {
-        // Map 3D coordinate position to harmonic scale notes
-        const noteIndex = Math.floor(Math.abs(x * 3.7 + y * 2.3 + z * 1.5)) % this.notes.length;
+      if (isTurning || motionMag > 0.4) {
+        // Physical elevation in phase space determines the note on the harmonic pentatonic scale:
+        // Lower elevation (vortex base) -> deep Tibetan singing bowl notes
+        // Higher elevation (wing apex) -> ethereal celestial crystal chimes
+        const relZ = z - (center[2] || 0);
+        const normZ = Math.max(0, Math.min(1, (relZ + 25) / 50));
+        const noteIndex = Math.min(this.notes.length - 1, Math.floor(normZ * this.notes.length));
         const selectedNote = this.notes[noteIndex];
 
-        // Spatial pan maps to horizontal X position
-        const pan = (x % 20) / 20.0;
-        const noteVolume = Math.min(0.5, 0.2 + (motionMag / 5.0) * 0.3);
+        // Spatial pan maps strictly to horizontal phase-space X position
+        const relX = x - (center[0] || 0);
+        const pan = Math.max(-0.85, Math.min(0.85, relX / 25.0));
+        const noteVolume = Math.min(0.55, 0.20 + Math.min(1.0, (motionMag * speed) / 2.0) * 0.35);
+
+        this.playChime(selectedNote.freq, pan, noteVolume);
+        this.lastTriggerTime = now;
+      }
+    }
+  }
+
+  /**
+   * Sonifies 2D discrete maps and custom sandbox equation orbits.
+   * Driven by continuous polar phase angle θ (tracing fractal winding arms) and step jump distance.
+   */
+  update2DMap(x = 0, y = 0, z = 0, scale = 0.25) {
+    if (!this.isPlaying || !this.ctx) return;
+    const now = this.ctx.currentTime;
+
+    const r = Math.hypot(x, y);
+    const theta = Math.atan2(y, x); // Polar phase angle in [-pi, pi]
+    const normAngle = (theta + Math.PI) / (2 * Math.PI); // Normalized [0, 1)
+
+    const stepDist = Math.hypot(x - this.prevX, y - this.prevY);
+    const radDiff = Math.abs(r - (this.prevRadius || 0));
+
+    this.prevX = x;
+    this.prevY = y;
+    this.prevZ = z;
+    this.prevRadius = r;
+
+    // Trigger deterministically when the orbit leaps across polar boundaries or radius extrema
+    if (now - this.lastTriggerTime >= 0.24) {
+      if (radDiff > 0.12 || stepDist > 0.3) {
+        // Polar phase angle directly selects scale note (melody traces geometric manifold winding number)
+        const noteIndex = Math.min(this.notes.length - 1, Math.floor(normAngle * this.notes.length));
+        const selectedNote = this.notes[noteIndex];
+
+        const pan = Math.max(-0.8, Math.min(0.8, x * scale * 3.5));
+        const noteVolume = Math.min(0.48, 0.20 + Math.min(1.0, stepDist / 2.5) * 0.28);
+
+        this.playChime(selectedNote.freq, pan, noteVolume);
+        this.lastTriggerTime = now;
+      }
+    }
+  }
+
+  /**
+   * Sonifies the double pendulum system from exact Lagrangian mechanics.
+   * Driven by kinetic energy peaks (bottom swings) and potential elevation cusps (top flips).
+   */
+  updatePendulum(theta1 = 0, theta2 = 0, omega1 = 0, omega2 = 0, l1 = 1.0, l2 = 1.0, m1 = 1.0, m2 = 1.0) {
+    if (!this.isPlaying || !this.ctx) return;
+    const now = this.ctx.currentTime;
+
+    // Lagrangian kinetic energy T
+    const delta = theta1 - theta2;
+    const kineticEnergy = 0.5 * (m1 + m2) * l1 * l1 * omega1 * omega1 +
+                          0.5 * m2 * l2 * l2 * omega2 * omega2 +
+                          m2 * l1 * l2 * omega1 * omega2 * Math.cos(delta);
+
+    // Instantaneous outer bob positions
+    const x2 = l1 * Math.sin(theta1) + l2 * Math.sin(theta2);
+    const y2 = l1 * Math.cos(theta1) + l2 * Math.cos(theta2); // +Downwards, -Upwards
+
+    // Total height above bottom: 0 = hanging bottom, 2*(l1+l2) = overhead vertical flip
+    const maxLen = l1 + l2;
+    const height = maxLen - y2;
+    const normHeight = Math.max(0, Math.min(1, height / (2 * maxLen)));
+
+    // Turning inflection detection
+    const isApex = Math.abs(omega2) < 0.3 && Math.abs(this.prevOmega2 || 0) >= 0.3;
+    const isKineticPeak = kineticEnergy > 5.0;
+
+    this.prevOmega1 = omega1;
+    this.prevOmega2 = omega2;
+
+    // Trigger deterministically at energy extrema (bottom power swings or top loop flips)
+    if (now - this.lastTriggerTime >= 0.20) {
+      if (isApex || isKineticPeak || kineticEnergy > 1.0) {
+        // Height in gravitational field maps to harmonic pitch:
+        // Deep Tibetan singing bowl tones at bottom speed, celestial crystal bells at top flips
+        const noteIndex = Math.min(this.notes.length - 1, Math.floor(normHeight * this.notes.length));
+        const selectedNote = this.notes[noteIndex];
+
+        const pan = Math.max(-0.85, Math.min(0.85, x2 / maxLen));
+        const noteVolume = Math.min(0.55, 0.20 + Math.min(1.0, kineticEnergy / 25.0) * 0.35);
+
+        this.playChime(selectedNote.freq, pan, noteVolume);
+        this.lastTriggerTime = now;
+      }
+    }
+  }
+
+  /**
+   * Sonifies Feigenbaum bifurcation cascade delay embedding points.
+   * State coordinate x drives harmonic intervals in periodic windows and shimmering chords in chaos.
+   */
+  updateBifurcation(r = 3.5, x = 0.5) {
+    if (!this.isPlaying || !this.ctx) return;
+    const now = this.ctx.currentTime;
+
+    const diff = Math.abs(x - (this.prevBifX || 0));
+    this.prevBifX = x;
+
+    if (now - this.lastTriggerTime >= 0.30) {
+      if (diff > 0.04) {
+        const normX = Math.max(0, Math.min(1, x));
+        const noteIndex = Math.min(this.notes.length - 1, Math.floor(normX * this.notes.length));
+        const selectedNote = this.notes[noteIndex];
+
+        // Stereo pan corresponds to growth parameter r
+        const pan = Math.max(-0.85, Math.min(0.85, (r - 3.2) / 0.8));
+        const noteVolume = Math.min(0.40, 0.20 + Math.min(1.0, diff * 3.0) * 0.20);
 
         this.playChime(selectedNote.freq, pan, noteVolume);
         this.lastTriggerTime = now;

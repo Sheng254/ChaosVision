@@ -3,6 +3,7 @@
  */
 
 import { ATTRACTORS_3D, ATTRACTORS_2D } from './math/attractors.js';
+import { CUSTOM_TEMPLATES } from './config/presets.js';
 import { TrajectorySwarm } from './math/rk4.js';
 import { DoublePendulumSystem } from './math/pendulum.js';
 import { BifurcationExplorer } from './math/bifurcation.js';
@@ -37,10 +38,8 @@ class ChaosVisionApp {
 
     // Dynamic Multi-Equation Sandbox state
     this.customTemplateId = 'peter_dejong';
-    this.customEquations = [
-      { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - \\cos(b \\cdot x)' },
-      { id: 'eq_y', target: 'y', latex: '\\sin(c \\cdot x) - \\cos(d \\cdot y)' }
-    ];
+    const initTmpl = CUSTOM_TEMPLATES.peter_dejong;
+    this.customEquations = JSON.parse(JSON.stringify(initTmpl.eqs));
     this.customCompiledSystem = null;
     this.lastFocusedMathField = null;
 
@@ -105,7 +104,6 @@ class ChaosVisionApp {
     }
 
     if (type === '3d_attractor') {
-      this.camera.autoRotate = true;
       const def = ATTRACTORS_3D[id] || ATTRACTORS_3D.lorenz;
       this.params = { ...def.defaultParams };
       this.swarm.init(def.initialState, this.swarmCount);
@@ -126,12 +124,17 @@ class ChaosVisionApp {
         gravity: { min: 1.0, max: 25.0, step: 0.1, label: 'Gravity (g)' },
         damping: { min: 0.0, max: 0.005, step: 0.0001, label: 'Friction' }
       }, { gravity: 9.81, damping: 0.0001 }, (k, v) => {
-        if (k === 'gravity') this.pendulum.g = v;
-        if (k === 'damping') this.pendulum.damping = v;
+        if (k === 'gravity') {
+          this.pendulum.g = v;
+          this.pendulum.perturbIfStalled();
+        }
+        if (k === 'damping') {
+          this.pendulum.damping = v;
+          this.pendulum.perturbIfStalled();
+        }
       });
     } else if (type === 'bifurcation') {
       this.bifurcation.reset();
-      this.camera.autoRotate = false;
       this.camera.rotX = this.camera.targetRotX = 0.0;
       this.camera.rotY = this.camera.targetRotY = 0.0;
       this.camera.zoom = this.camera.targetZoom = 1.0;
@@ -146,7 +149,15 @@ class ChaosVisionApp {
         this.bifurcation.reset();
       });
     } else if (type === 'custom') {
+      const tmpl = CUSTOM_TEMPLATES[this.customTemplateId] || CUSTOM_TEMPLATES.peter_dejong;
+      this.customEquations = JSON.parse(JSON.stringify(tmpl.eqs));
+      this.params = { ...tmpl.params };
+      this.renderEquationRows();
       this.compileCustomFormula();
+    }
+
+    if (this.hud) {
+      this.hud.updateAutoRotateUI(this.camera.autoRotate);
     }
 
     const selectEl = document.getElementById('system-select');
@@ -478,75 +489,16 @@ class ChaosVisionApp {
 
     // Preset Templates
     const templateSelect = document.getElementById('custom-template-select');
-    const templates = {
-      peter_dejong: {
-        eqs: [
-          { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - \\cos(b \\cdot x)' },
-          { id: 'eq_y', target: 'y', latex: '\\sin(c \\cdot x) - \\cos(d \\cdot y)' }
-        ],
-        params: { a: 1.4, b: -2.3, c: 2.4, d: -2.1 }
-      },
-      clifford: {
-        eqs: [
-          { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) + c \\cdot \\cos(a \\cdot x)' },
-          { id: 'eq_y', target: 'y', latex: '\\sin(b \\cdot x) + d \\cdot \\cos(b \\cdot y)' }
-        ],
-        params: { a: -1.4, b: 1.6, c: 1.0, d: 0.7 }
-      },
-      hopalong: {
-        eqs: [
-          { id: 'eq_x', target: 'x', latex: 'y - \\operatorname{sign}(x) \\cdot \\sqrt{\\left| b \\cdot x - c \\right|}' },
-          { id: 'eq_y', target: 'y', latex: 'a - x' }
-        ],
-        params: { a: 2.0, b: 1.0, c: 0.0 }
-      },
-      ikeda: {
-        eqs: [
-          { id: 'eq_t', target: 't', latex: '0.4 - \\frac{6}{1 + x^2 + y^2}' },
-          { id: 'eq_x', target: 'x', latex: '1 + u \\cdot (x \\cdot \\cos(t) - y \\cdot \\sin(t))' },
-          { id: 'eq_y', target: 'y', latex: 'u \\cdot (x \\cdot \\sin(t) + y \\cdot \\cos(t))' }
-        ],
-        params: { u: 0.9 }
-      },
-      gumowski: {
-        eqs: [
-          { id: 'eq_x', target: 'x', latex: 'y + a \\cdot (1 - 0.05 \\cdot y^2) \\cdot y + \\frac{2 \\cdot x}{1 + x^2}' },
-          { id: 'eq_y', target: 'y', latex: '-x + \\frac{2 \\cdot y}{1 + y^2}' }
-        ],
-        params: { a: 0.008, b: 0.05 }
-      },
-      tinkerbell: {
-        eqs: [
-          { id: 'eq_x', target: 'x', latex: 'x^2 - y^2 + a \\cdot x + b \\cdot y' },
-          { id: 'eq_y', target: 'y', latex: '2 \\cdot x \\cdot y + c \\cdot x + d \\cdot y' }
-        ],
-        params: { a: 0.9, b: -0.6, c: 2.0, d: 0.5 }
-      },
-      sprott_3d: {
-        eqs: [
-          { id: 'eq_x', target: 'x', latex: '\\sin(a \\cdot y) - z \\cdot \\cos(b \\cdot x)' },
-          { id: 'eq_y', target: 'y', latex: 'z \\cdot \\sin(c \\cdot x) - \\cos(d \\cdot y)' },
-          { id: 'eq_z', target: 'z', latex: '\\sin(x)' }
-        ],
-        params: { a: 2.24, b: -0.65, c: 0.43, d: -2.43 }
-      },
-      blank: {
-        eqs: [
-          { id: 'eq_x', target: 'x', latex: '' },
-          { id: 'eq_y', target: 'y', latex: '' }
-        ],
-        params: { a: 1.0, b: 1.0 }
-      }
-    };
-
     if (templateSelect) {
       templateSelect.addEventListener('change', (e) => {
         const val = e.target.value;
         this.customTemplateId = val;
-        const t = templates[val];
+        const t = CUSTOM_TEMPLATES[val];
         if (t) {
           this.customEquations = JSON.parse(JSON.stringify(t.eqs));
           this.params = { ...t.params };
+          this.camera.autoRotate = (val === 'sprott_3d');
+          if (this.hud) this.hud.updateAutoRotateUI(this.camera.autoRotate);
           this.renderEquationRows();
           this.compileCustomFormula();
         }
@@ -667,15 +619,33 @@ class ChaosVisionApp {
         const freeVars = this.customCompiledSystem.freeVars || [];
         const activeVars = freeVars.length > 0 ? freeVars : ['a', 'b', 'c', 'd'];
 
+        const tmpl = CUSTOM_TEMPLATES[this.customTemplateId] || CUSTOM_TEMPLATES.peter_dejong;
         const paramRanges = {};
         const defaultParamVals = { a: 1.4, b: -2.3, c: 2.4, d: -2.1, k: 1.0, m: 1.0, u: 0.9 };
 
         activeVars.forEach(v => {
-          paramRanges[v] = { min: -3.0, max: 3.0, step: 0.05, label: v };
+          if (tmpl.paramRanges && tmpl.paramRanges[v]) {
+            paramRanges[v] = { ...tmpl.paramRanges[v] };
+          } else {
+            paramRanges[v] = { min: -3.0, max: 3.0, step: 0.05, label: v };
+          }
           if (this.params[v] === undefined) {
-            this.params[v] = defaultParamVals[v] !== undefined ? defaultParamVals[v] : 1.0;
+            if (tmpl.params && tmpl.params[v] !== undefined) {
+              this.params[v] = tmpl.params[v];
+            } else if (defaultParamVals[v] !== undefined) {
+              this.params[v] = defaultParamVals[v];
+            } else {
+              this.params[v] = 1.0;
+            }
           }
         });
+
+        // Filter params to only active variables
+        const cleanParams = {};
+        activeVars.forEach(v => {
+          cleanParams[v] = this.params[v];
+        });
+        this.params = cleanParams;
 
         this.hud.updateDynamicParams(paramRanges, this.params, (k, val) => {
           this.params[k] = val;
@@ -721,7 +691,7 @@ class ChaosVisionApp {
   }
 
   renderLoop(timestamp) {
-    this.camera.update();
+    this.camera.update(timestamp);
 
     let divergence = 0;
     let iterationMetric = '0';
@@ -746,32 +716,42 @@ class ChaosVisionApp {
       }
 
       if (trajectories.length > 0) {
-        this.sonifier.update(trajectories[0].state, trajectories[0].speed);
+        this.sonifier.update(trajectories[0].state, trajectories[0].speed, def.center);
       }
       iterationMetric = `${trajectories.length * 500} pts`;
     } else if (this.systemType === '2d_map') {
       const def = ATTRACTORS_2D[this.systemId] || ATTRACTORS_2D.clifford;
+      const zoom = Math.max(1.0, this.camera.zoom || 1.0);
       const isInteracting = this.camera.isDragging || this.camera.isPanning ||
         Math.abs(this.camera.velZoom) > 0.0005 ||
         Math.abs(this.camera.velRotX) > 0.0005 ||
         Math.abs(this.camera.velRotY) > 0.0005;
 
-      const dynamicFade = isInteracting ? Math.max(0.22, this.trailDecay * 3) : this.trailDecay;
+      const baseBatch = isInteracting ? 52000 : 38000;
+      // Adaptively scale batch iterations with zoom so light never fades
+      const batchIterations = Math.round(baseBatch * this.speed * Math.min(3.0, 1.0 + (Math.sqrt(zoom) - 1.0) * 0.8));
+      const dynamicFade = isInteracting ? Math.min(0.08, this.trailDecay * 1.2) : this.trailDecay;
 
       this.renderer2D.fade(dynamicFade);
       this.renderer2D.render2DMapBatch(
         def.iterate,
         this.params,
-        Math.round(35000 * this.speed),
+        batchIterations,
         this.paletteId,
         def.scale,
         this.camera
       );
+      this.sonifier.update2DMap(this.renderer2D.currX, this.renderer2D.currY, this.renderer2D.currZ, def.scale);
       iterationMetric = `${this.renderer2D.iterationCount.toLocaleString()} iter`;
     } else if (this.systemType === 'pendulum') {
       this.renderer3D.fade(this.trailDecay);
-      this.pendulum.update(0.02 * this.speed, 10);
-      this.renderer3D.renderDoublePendulum(this.pendulum.getPendulums(), this.camera, this.paletteId, true);
+      this.pendulum.update(0.02 * this.speed, 16);
+      const pendulums = this.pendulum.getPendulums();
+      this.renderer3D.renderDoublePendulum(pendulums, this.camera, this.paletteId, true);
+      if (pendulums.length > 0) {
+        const lead = pendulums[0];
+        this.sonifier.updatePendulum(lead.theta1, lead.theta2, lead.omega1, lead.omega2, this.pendulum.l1, this.pendulum.l2, this.pendulum.m1, this.pendulum.m2);
+      }
       iterationMetric = `${this.pendulum.count} bobs`;
     } else if (this.systemType === 'bifurcation') {
       this.bifurcation.render(
@@ -781,27 +761,34 @@ class ChaosVisionApp {
         this.canvas.clientWidth,
         this.canvas.clientHeight
       );
+      this.sonifier.updateBifurcation(3.5699, 0.5);
       iterationMetric = '3D Manifold';
     } else if (this.systemType === 'custom' && this.customCompiledSystem) {
       const t = timestamp * 0.001;
       const fnSystem = this.customCompiledSystem;
       const params = this.params;
+      const zoom = Math.max(1.0, this.camera.zoom || 1.0);
       const isInteracting = this.camera.isDragging || this.camera.isPanning ||
         Math.abs(this.camera.velZoom) > 0.0005 ||
         Math.abs(this.camera.velRotX) > 0.0005 ||
         Math.abs(this.camera.velRotY) > 0.0005;
 
-      const dynamicFade = isInteracting ? Math.max(0.22, this.trailDecay * 3) : this.trailDecay;
+      const baseBatch = isInteracting ? 52000 : 38000;
+      const batchIterations = Math.round(baseBatch * this.speed * Math.min(3.0, 1.0 + (Math.sqrt(zoom) - 1.0) * 0.8));
+      const dynamicFade = isInteracting ? Math.min(0.08, this.trailDecay * 1.2) : this.trailDecay;
+      const tmpl = CUSTOM_TEMPLATES[this.customTemplateId] || CUSTOM_TEMPLATES.peter_dejong;
+      const customScale = tmpl.scale || 0.20;
 
       this.renderer2D.fade(dynamicFade);
       this.renderer2D.render2DMapBatch(
         (x, y, z, p) => fnSystem(x, y, z, t, p || params),
         params,
-        Math.round(35000 * this.speed),
+        batchIterations,
         this.paletteId,
-        0.25,
+        customScale,
         this.camera
       );
+      this.sonifier.update2DMap(this.renderer2D.currX, this.renderer2D.currY, this.renderer2D.currZ, customScale);
       iterationMetric = `${this.customEquations.length} Equations`;
     }
 

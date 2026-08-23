@@ -5,6 +5,12 @@
 
 import { TrailBuffer } from './rk4.js';
 
+function wrapAngle(rad) {
+  let a = (rad + Math.PI) % (2 * Math.PI);
+  if (a < 0) a += 2 * Math.PI;
+  return a - Math.PI;
+}
+
 export class DoublePendulumSystem {
   constructor(count = 10, maxTrailLength = 450) {
     this.count = count;
@@ -16,6 +22,8 @@ export class DoublePendulumSystem {
     this.m1 = 1.0;
     this.m2 = 1.0;
     this.damping = 0.00008;
+    this.initialTheta1 = Math.PI / 2;
+    this.initialTheta2 = Math.PI / 2;
   }
 
   /**
@@ -27,6 +35,8 @@ export class DoublePendulumSystem {
    */
   init(theta1 = Math.PI / 2, theta2 = Math.PI / 2, count = 10, delta = 0.0001) {
     this.count = count;
+    this.initialTheta1 = theta1;
+    this.initialTheta2 = theta2;
     this.pendulums = [];
 
     for (let i = 0; i < count; i++) {
@@ -43,6 +53,30 @@ export class DoublePendulumSystem {
   }
 
   /**
+   * Automatically re-energizes the pendulum swarm if they settle at static rest,
+   * restoring full dynamic chaotic swinging when friction is lowered or gravity changed.
+   */
+  perturbIfStalled(force = false) {
+    const isStalled = force || this.pendulums.every(p => {
+      const spd = Math.abs(p.omega1) + Math.abs(p.omega2);
+      const nearBottom = Math.abs(p.theta1) < 0.2 && Math.abs(p.theta2) < 0.2;
+      return spd < 0.05 && nearBottom;
+    });
+
+    if (isStalled) {
+      for (let i = 0; i < this.pendulums.length; i++) {
+        const p = this.pendulums[i];
+        const offset = i * 0.0001;
+        p.theta1 = this.initialTheta1 + offset;
+        p.theta2 = this.initialTheta2 + offset;
+        p.omega1 = 0;
+        p.omega2 = 0;
+        p.trail = new TrailBuffer(this.maxTrailLength);
+      }
+    }
+  }
+
+  /**
    * Computes angular accelerations from the Lagrangian equations of motion.
    * @returns {number[]} [alpha1, alpha2] angular accelerations
    */
@@ -51,6 +85,9 @@ export class DoublePendulumSystem {
     const delta = t1 - t2;
 
     const den = 2 * m1 + m2 - m2 * Math.cos(2 * t1 - 2 * t2);
+    if (Math.abs(den) < 1e-9) {
+      return [0, 0];
+    }
 
     const num1 =
       -g * (2 * m1 + m2) * Math.sin(t1) -
@@ -67,15 +104,31 @@ export class DoublePendulumSystem {
 
     const alpha2 = num2 / (l2 * den);
 
+    if (!isFinite(alpha1) || !isFinite(alpha2)) {
+      return [0, 0];
+    }
+
     return [alpha1, alpha2];
   }
 
   /**
-   * Advances a single pendulum by one RK4 step.
+   * Advances a single pendulum by one RK4 step with validation and recovery.
    * @param {Object} p - Pendulum state object
    * @param {number} dt - Time step
    */
   rk4Step(p, dt) {
+    // Sanity check before step
+    if (!isFinite(p.theta1) || !isFinite(p.theta2) || !isFinite(p.omega1) || !isFinite(p.omega2) ||
+        Math.abs(p.omega1) > 200 || Math.abs(p.omega2) > 200) {
+      const offset = p.id * 0.0001;
+      p.theta1 = this.initialTheta1 + offset;
+      p.theta2 = this.initialTheta2 + offset;
+      p.omega1 = 0;
+      p.omega2 = 0;
+      p.trail = new TrailBuffer(this.maxTrailLength);
+      return;
+    }
+
     const { theta1, theta2, omega1, omega2 } = p;
 
     const [a1_k1, a2_k1] = this.derivatives(theta1, theta2, omega1, omega2);
@@ -103,16 +156,41 @@ export class DoublePendulumSystem {
     p.omega1 += (dt / 6.0) * (a1_k1 + 2 * a1_k2 + 2 * a1_k3 + a1_k4);
     p.omega2 += (dt / 6.0) * (a2_k1 + 2 * a2_k2 + 2 * a2_k3 + a2_k4);
 
-    p.omega1 *= (1 - this.damping);
-    p.omega2 *= (1 - this.damping);
+    p.omega1 *= Math.max(0, 1 - this.damping);
+    p.omega2 *= Math.max(0, 1 - this.damping);
+
+    // Keep velocities in a stable bounded range
+    const maxOmega = 80.0;
+    p.omega1 = Math.max(-maxOmega, Math.min(maxOmega, p.omega1));
+    p.omega2 = Math.max(-maxOmega, Math.min(maxOmega, p.omega2));
+
+    // Wrap angles to avoid numerical precision loss
+    p.theta1 = wrapAngle(p.theta1);
+    p.theta2 = wrapAngle(p.theta2);
   }
 
   /**
-   * Advances all pendulums by one frame using the specified number of sub-steps.
+   * Advances all pendulums by one frame using adaptive sub-stepping for extreme stability.
    * @param {number} dt - Total frame time step
-   * @param {number} substeps - Number of integration sub-steps for accuracy
+   * @param {number} baseSubsteps - Minimum sub-steps
    */
-  update(dt = 0.02, substeps = 16) {
+  update(dt = 0.02, baseSubsteps = 16) {
+    // Dynamically increase substeps for high gravity or fast velocity to prevent RK4 divergence
+    let maxSpeed = 0;
+    for (let i = 0; i < this.pendulums.length; i++) {
+      const p = this.pendulums[i];
+      const spd = Math.max(Math.abs(p.omega1), Math.abs(p.omega2));
+      if (spd > maxSpeed) maxSpeed = spd;
+    }
+
+    // If friction was lowered and pendulums are stopped, wake them back up
+    if (maxSpeed < 0.01 && this.damping < 0.0008) {
+      this.perturbIfStalled();
+    }
+
+    const gravityFactor = Math.max(1, Math.ceil(this.g / 5));
+    const speedFactor = Math.max(1, Math.ceil(maxSpeed / 10));
+    const substeps = Math.min(64, Math.max(baseSubsteps, gravityFactor * 8, speedFactor * 8));
     const subDt = dt / substeps;
 
     for (let s = 0; s < substeps; s++) {

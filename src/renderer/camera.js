@@ -28,8 +28,10 @@ export class OrbitCamera {
     this.velPanY = 0;
     this.velZoom = 0;
 
-    this.autoRotate = true;
-    this.autoRotateSpeed = 0.002;
+    this.autoRotateEnabled = true;
+    this.autoRotateAngularSpeed = 0.15; // Universal ~42s per 360-degree rotation across all devices & systems
+    this.lastUpdateTimestamp = 0;
+    this.resumeDelayMs = 300;
 
     this.isDragging = false;
     this.isPanning = false;
@@ -44,6 +46,22 @@ export class OrbitCamera {
     this.initEvents();
   }
 
+  get autoRotate() {
+    return this.autoRotateEnabled;
+  }
+
+  set autoRotate(val) {
+    this.autoRotateEnabled = !!val;
+    if (val) {
+      this.lastInteractionTime = performance.now() - this.resumeDelayMs;
+    }
+  }
+
+  toggleAutoRotate() {
+    this.autoRotate = !this.autoRotateEnabled;
+    return this.autoRotateEnabled;
+  }
+
   initEvents() {
     const el = this.canvas;
 
@@ -53,19 +71,17 @@ export class OrbitCamera {
       this.isPanning = (e.button === 2 || (e.button === 0 && e.shiftKey));
       this.lastMouseX = e.clientX;
       this.lastMouseY = e.clientY;
+      this.lastInteractionTime = performance.now();
 
       this.velRotX = 0;
       this.velRotY = 0;
       this.velPanX = 0;
       this.velPanY = 0;
-
-      if (this.isDragging) {
-        this.autoRotate = false;
-      }
     });
 
     window.addEventListener('mousemove', (e) => {
       if (!this.isDragging && !this.isPanning) return;
+      this.lastInteractionTime = performance.now();
 
       const dx = e.clientX - this.lastMouseX;
       const dy = e.clientY - this.lastMouseY;
@@ -94,6 +110,7 @@ export class OrbitCamera {
     window.addEventListener('mouseup', () => {
       this.isDragging = false;
       this.isPanning = false;
+      this.lastInteractionTime = performance.now();
     });
 
     el.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -101,6 +118,7 @@ export class OrbitCamera {
     // Kinetic Wheel / Trackpad Zoom
     el.addEventListener('wheel', (e) => {
       e.preventDefault();
+      this.lastInteractionTime = performance.now();
 
       // Normalize delta across line vs pixel vs page modes
       const rawDelta = e.deltaMode === 1 ? e.deltaY * 16 : (e.deltaMode === 2 ? e.deltaY * 250 : e.deltaY);
@@ -113,6 +131,7 @@ export class OrbitCamera {
 
     // Touch Controls
     el.addEventListener('touchstart', (e) => {
+      this.lastInteractionTime = performance.now();
       if (e.touches.length === 1) {
         this.isDragging = true;
         this.isPanning = false;
@@ -120,7 +139,6 @@ export class OrbitCamera {
         this.lastMouseY = e.touches[0].clientY;
         this.velRotX = 0;
         this.velRotY = 0;
-        this.autoRotate = false;
       } else if (e.touches.length === 2) {
         this.isDragging = false;
         this.isPanning = true;
@@ -134,6 +152,7 @@ export class OrbitCamera {
 
     el.addEventListener('touchmove', (e) => {
       e.preventDefault();
+      this.lastInteractionTime = performance.now();
       if (e.touches.length === 1 && this.isDragging) {
         const dx = e.touches[0].clientX - this.lastMouseX;
         const dy = e.touches[0].clientY - this.lastMouseY;
@@ -173,6 +192,7 @@ export class OrbitCamera {
     }, { passive: false });
 
     const endTouch = (e) => {
+      this.lastInteractionTime = performance.now();
       if (e.touches.length === 0) {
         this.isDragging = false;
         this.isPanning = false;
@@ -190,10 +210,14 @@ export class OrbitCamera {
     el.addEventListener('touchcancel', endTouch);
   }
 
-  update() {
-    // Auto-rotation when idle
-    if (this.autoRotate && !this.isDragging) {
-      this.targetRotY += this.autoRotateSpeed;
+  update(timestamp) {
+    const now = timestamp || performance.now();
+    const dt = this.lastUpdateTimestamp ? Math.min(0.05, (now - this.lastUpdateTimestamp) * 0.001) : (1 / 60);
+    this.lastUpdateTimestamp = now;
+
+    // Universal frame-rate independent auto-rotation (not too fast, not too slow)
+    if (this.autoRotateEnabled && !this.isDragging) {
+      this.targetRotY += this.autoRotateAngularSpeed * dt;
     }
 
     // Inertial glide on release

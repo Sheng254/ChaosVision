@@ -63,6 +63,16 @@ export class HUDController {
       });
     }
 
+    // Auto-Rotate Toggle Button
+    const autoRotateBtn = document.getElementById('btn-auto-rotate');
+    if (autoRotateBtn) {
+      autoRotateBtn.addEventListener('click', () => {
+        const enabled = this.app.camera.toggleAutoRotate();
+        this.updateAutoRotateUI(enabled);
+        this.showToast(enabled ? 'Auto-rotation enabled' : 'Auto-rotation paused');
+      });
+    }
+
     // Share Creation Button
     const shareBtn = document.getElementById('btn-share');
     if (shareBtn) {
@@ -433,5 +443,16 @@ export class HUDController {
     this.toastTimer = setTimeout(() => {
       toast.classList.remove('visible');
     }, duration);
+  }
+
+  updateAutoRotateUI(enabled) {
+    const autoRotateBtn = document.getElementById('btn-auto-rotate');
+    if (autoRotateBtn) {
+      autoRotateBtn.classList.toggle('active', !!enabled);
+      const label = autoRotateBtn.querySelector('.btn-label');
+      if (label) {
+        label.textContent = enabled ? 'Auto-Rotate: ON' : 'Auto-Rotate: OFF';
+      }
+    }
   }
 }
